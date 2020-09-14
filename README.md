@@ -1,8 +1,15 @@
 # phpClickHouse-laravel
 Adapter of the most popular library https://github.com/smi2/phpClickHouse to Laravel
 
+## Features
+
+No dependency, only Curl (support php >=7.1 )
+
+More: https://github.com/smi2/phpClickHouse#features
+    
 ## Prerequisites
 - php 7.1
+- Laravel 7+
 - clickhouse server
 
 ## Installation
