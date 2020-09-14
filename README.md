@@ -61,7 +61,8 @@ $statement = $db->select('SELECT * FROM summing_url_views LIMIT 2');
 ```
 More about `$db` see here: https://github.com/smi2/phpClickHouse/blob/master/README.md
 
-Or use dawnings of Eloquent ORM (will be implemented completely)
+#### Or use dawnings of Eloquent ORM (will be implemented completely)
+
 **1.** Add model
 ```php
 <?php
