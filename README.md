@@ -55,7 +55,7 @@ CLICKHOUSE_TIMEOUT_QUERY=2
 
 You can use smi2/phpClickHouse functionality directly:
 ```php
-/** @var \ClickHouseDB\Client $client */
+/** @var \ClickHouseDB\Client $db */
 $db = DB::connection('clickhouse')->getClient();
 $statement = $db->select('SELECT * FROM summing_url_views LIMIT 2');
 ```
