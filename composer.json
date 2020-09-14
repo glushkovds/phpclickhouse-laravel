@@ -1,0 +1,34 @@
+{
+  "name": "glushkovds/phpclickhouse-laravel",
+  "description": "Adapter of the most popular library https://github.com/smi2/phpClickHouse to Laravel",
+  "keywords": [
+    "php",
+    "laravel",
+    "clickhouse"
+  ],
+  "homepage": "https://github.com/glushkovds/phpClickHouse-laravel",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Denis Glushkov",
+      "email": "amkarovec@gmail.com",
+      "homepage": "https://github.com/glushkovds"
+    }
+  ],
+  "require": {
+    "php": ">=7.1.0",
+    "laravel/framework": "^7.0",
+    "smi2/phpclickhouse": "^1.3"
+  },
+  "require-dev": {
+  },
+  "suggest": {
+  },
+  "autoload": {
+    "psr-4": {
+      "PhpClickHouseLaravel\\": "src/"
+    }
+  }
+}
+
