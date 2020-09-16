@@ -17,16 +17,7 @@ More: https://github.com/smi2/phpClickHouse#features
 
 ## Installation
 
-**1.** Add to composer.json:
-```json
-"repositories": [
-    {
-        "type": "git",
-        "url": "https://github.com/glushkovds/phpClickHouse-laravel.git"
-    }
-]
-```
-And then:
+**1.**  Install via composer
 ```sh
 $ composer require glushkovds/phpclickhouse-laravel
 ```
