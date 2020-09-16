@@ -16,7 +16,6 @@ More: https://github.com/smi2/phpClickHouse#features
 - clickhouse server
 
 ## Installation
-Now available only dev version
 
 **1.** Add to composer.json:
 ```json
