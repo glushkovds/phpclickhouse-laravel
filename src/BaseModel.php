@@ -53,4 +53,14 @@ class BaseModel
     {
         return $row;
     }
+
+    /**
+     * @param array $select optional = ['*']
+     * @return Builder
+     */
+    public static function select($select = ['*'])
+    {
+        return (new Builder())->select($select)->from((new static)->table);
+    }
+
 }

@@ -1,5 +1,8 @@
 # phpClickHouse-laravel
-Adapter of the most popular library https://github.com/smi2/phpClickHouse to Laravel
+
+Adapter to Laravel of the most popular libraries:
+- https://github.com/smi2/phpClickHouse - for connections and perform queries
+- https://github.com/the-tinderbox/ClickhouseBuilder - good query builder
 
 ## Features
 
@@ -101,7 +104,10 @@ class CreateMyTable extends \PhpClickHouseLaravel\Migration
     {
         static::write('
             CREATE TABLE my_table (
-                id Int32
+                id UInt32,
+                created_at DateTime,
+                field_one String,
+                field_two Int32
             )
             ENGINE = MergeTree()
             ORDER BY (id)
@@ -118,10 +124,17 @@ class CreateMyTable extends \PhpClickHouseLaravel\Migration
         static::write('DROP TABLE my_table');
     }
 }
-
 ```
 
-**3.** And then use it
+**3.** And then you can insert one row or bulk insert
 ```php
 MyAwesomeModel::insert($rows);
+```
+
+**4.** Now check out the query builder 
+```php
+$rows = MyAwesomeModel::select(['field_one', new RawColumn('sum(field_two)', 'field_two_sum')])
+    ->where('created_at', '>', '2020-09-14 12:47:29')
+    ->groupBy('field_one')
+    ->getRows();
 ```
