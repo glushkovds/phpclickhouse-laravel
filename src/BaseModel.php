@@ -45,11 +45,44 @@ class BaseModel
     }
 
     /**
+     * Bulk insert rows as associative array into Clickhouse database
+     * @param array[] $rows
+     * @return \ClickHouseDB\Statement
+     */
+    public static function insertAssoc($rows)
+    {
+        return static::getClient()->insertAssocBulk((new static)->table, $rows);
+    }
+
+    /**
+     * Prepare each row by calling static::prepareAssocFromRequest to bulk insert into database
+     * @param array[] $rows
+     * @return \ClickHouseDB\Statement
+     */
+    public static function prepareAndInsertAssoc($rows)
+    {
+        $rows = array_map('static::prepareAssocFromRequest', $rows);
+        return static::getClient()->insertAssocBulk((new static)->table, $rows);
+    }
+
+    /**
+     * Prepare row to insert into DB, non associative array
      * Need to overwrite in nested models
      * @param array $row
      * @return array
      */
     public static function prepareFromRequest($row)
+    {
+        return $row;
+    }
+
+    /**
+     * Prepare row to insert into DB, associative array
+     * Need to overwrite in nested models
+     * @param array $row
+     * @return array
+     */
+    public static function prepareAssocFromRequest($row)
     {
         return $row;
     }
