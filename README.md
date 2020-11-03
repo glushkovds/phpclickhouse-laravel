@@ -72,8 +72,9 @@ namespace App\Models\Clickhouse;
 
 use PhpClickHouseLaravel\BaseModel;
 
-class MyTableModel extends BaseModel
+class MyTable extends BaseModel
 {
+    // Not necessary. Can be obtained from class name MyTable => my_table
     protected $table = 'my_table';
 
 }
@@ -116,14 +117,30 @@ class CreateMyTable extends \PhpClickHouseLaravel\Migration
 }
 ```
 
-**3.** And then you can insert one row or bulk insert
+**3.** And then you can insert data
+
+One row 
 ```php
-MyAwesomeModel::insert($rows);
+$model = MyTable::create(['model_name' => 'model 1', 'some_param' => 1]);
+# or
+$model = MyTable::make(['model_name' => 'model 1']);
+$model->some_param = 1;
+$model->save();
+# or
+$model = new MyTable();
+$model->fill(['model_name' => 'model 1', 'some_param' => 1])->save();
+```
+Or bulk insert
+```php
+# Non assoc way
+MyTable::insertBulk([['model 1', 1], ['model 2', 2]], ['model_name', 'some_param']);
+# Assoc way
+MyTable::insertAssoc([['model_name' => 'model 1', 'some_param' => 1], ['model_name' => 'model 2', 'some_param' => 2]]);
 ```
 
 **4.** Now check out the query builder 
 ```php
-$rows = MyAwesomeModel::select(['field_one', new RawColumn('sum(field_two)', 'field_two_sum')])
+$rows = MyTable::select(['field_one', new RawColumn('sum(field_two)', 'field_two_sum')])
     ->where('created_at', '>', '2020-09-14 12:47:29')
     ->groupBy('field_one')
     ->getRows();
