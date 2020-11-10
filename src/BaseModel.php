@@ -5,7 +5,6 @@ namespace PhpClickHouseLaravel;
 
 
 use ClickHouseDB\Client;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasAttributes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
