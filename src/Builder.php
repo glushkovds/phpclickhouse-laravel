@@ -25,9 +25,19 @@ class Builder extends BaseBuilder
      */
     public function get()
     {
-        /** @var Client $db */
-        $db = DB::connection('clickhouse')->getClient();
-        return $db->select($this->toSql());
+        try {
+            /** @var Client $db */
+            $db = DB::connection('clickhouse')->getClient();
+            return $db->select($this->toSql());
+        } catch (\Throwable $e) {
+            Log::warning('Reached error', ['error' => $e->getCode(), 'message' => $e->getMessage()]);
+            if ($e->getCode() == 28) {
+                Log::warning('Reached resolving timeout');
+            }
+            /** @var Client $db */
+            $db = DB::connection('clickhouse')->getClient();
+            return $db->select($this->toSql());
+        }
     }
 
     /**
@@ -35,14 +45,6 @@ class Builder extends BaseBuilder
      */
     public function getRows()
     {
-        try {
-            return $this->get()->rows();
-        } catch (QueryException $e) {
-            Log::warning('Reached error', ['error' => $e->getCode(), 'message' => $e->getMessage()]);
-            if ($e->getCode() == 28) {
-                Log::warning('Reached resolving timeout');
-                return $this->get()->rows();
-            }
-        }
+        return $this->get()->rows();
     }
 }
