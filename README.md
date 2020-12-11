@@ -33,8 +33,11 @@ $ composer require glushkovds/phpclickhouse-laravel
     'password' => env('CLICKHOUSE_PASSWORD',''),
     'timeout_connect' => env('CLICKHOUSE_TIMEOUT_CONNECT',2),
     'timeout_query' => env('CLICKHOUSE_TIMEOUT_QUERY',2),
-]
+    'https' => (bool)env('CLICKHOUSE_HTTPS', null),
+    'retries' => env('CLICKHOUSE_RETRIES', 0),
+],
 ```
+
 Then patch your .env:
 ```dotenv
 CLICKHOUSE_HOST=localhost
@@ -44,6 +47,8 @@ CLICKHOUSE_USERNAME=default
 CLICKHOUSE_PASSWORD=
 CLICKHOUSE_TIMEOUT_CONNECT=2
 CLICKHOUSE_TIMEOUT_QUERY=2
+# only if you use https connection
+CLICKHOUSE_HTTPS=true
 ```
 
 **3.** Add service provider into your config/app.php file providers section:
@@ -145,3 +150,17 @@ $rows = MyTable::select(['field_one', new RawColumn('sum(field_two)', 'field_two
     ->groupBy('field_one')
     ->getRows();
 ```
+
+## Advanced usage
+
+### Retries
+
+You may enable ability to retry requests while received not 200 response, maybe due network connectivity problems.
+
+Patch your .env:
+```dotenv
+CLICKHOUSE_RETRIES=2
+```
+retries is optional, default value is 0.  
+0 mean only one attempt.  
+1 mean one attempt + 1 retry while error (total 2 attempts).
