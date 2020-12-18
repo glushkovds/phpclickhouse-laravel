@@ -152,8 +152,8 @@ class BaseModel
      */
     public static function prepareAndInsertAssoc($rows)
     {
-        $rows = array_map('static::prepareAssocFromRequest', $rows);
-        if ($rows[0]) {
+        $rows = array_values(array_map('static::prepareAssocFromRequest', $rows));
+        if (isset($rows[0]) && isset($rows[1])) {
             $keys = array_keys($rows[0]);
             foreach ($rows as &$row) {
                 $row = array_replace(array_flip($keys), $row);
