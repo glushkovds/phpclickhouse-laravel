@@ -153,6 +153,12 @@ class BaseModel
     public static function prepareAndInsertAssoc($rows)
     {
         $rows = array_map('static::prepareAssocFromRequest', $rows);
+        if ($rows[0]) {
+            $keys = array_keys($rows[0]);
+            foreach ($rows as &$row) {
+                $row = array_replace(array_flip($keys), $row);
+            }
+        }
         return static::getClient()->insertAssocBulk((new static)->getTable(), $rows);
     }
 

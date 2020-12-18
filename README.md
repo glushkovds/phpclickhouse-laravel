@@ -140,7 +140,7 @@ Or bulk insert
 # Non assoc way
 MyTable::insertBulk([['model 1', 1], ['model 2', 2]], ['model_name', 'some_param']);
 # Assoc way
-MyTable::insertAssoc([['model_name' => 'model 1', 'some_param' => 1], ['model_name' => 'model 2', 'some_param' => 2]]);
+MyTable::insertAssoc([['model_name' => 'model 1', 'some_param' => 1], ['some_param' => 2, 'model_name' => 'model 2']]);
 ```
 
 **4.** Now check out the query builder 
