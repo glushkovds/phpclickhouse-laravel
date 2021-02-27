@@ -33,8 +33,11 @@ $ composer require glushkovds/phpclickhouse-laravel
     'password' => env('CLICKHOUSE_PASSWORD',''),
     'timeout_connect' => env('CLICKHOUSE_TIMEOUT_CONNECT',2),
     'timeout_query' => env('CLICKHOUSE_TIMEOUT_QUERY',2),
-]
+    'https' => (bool)env('CLICKHOUSE_HTTPS', null),
+    'retries' => env('CLICKHOUSE_RETRIES', 0),
+],
 ```
+
 Then patch your .env:
 ```dotenv
 CLICKHOUSE_HOST=localhost
@@ -44,6 +47,8 @@ CLICKHOUSE_USERNAME=default
 CLICKHOUSE_PASSWORD=
 CLICKHOUSE_TIMEOUT_CONNECT=2
 CLICKHOUSE_TIMEOUT_QUERY=2
+# only if you use https connection
+CLICKHOUSE_HTTPS=true
 ```
 
 **3.** Add service provider into your config/app.php file providers section:
@@ -72,8 +77,9 @@ namespace App\Models\Clickhouse;
 
 use PhpClickHouseLaravel\BaseModel;
 
-class MyTableModel extends BaseModel
+class MyTable extends BaseModel
 {
+    // Not necessary. Can be obtained from class name MyTable => my_table
     protected $table = 'my_table';
 
 }
@@ -116,15 +122,45 @@ class CreateMyTable extends \PhpClickHouseLaravel\Migration
 }
 ```
 
-**3.** And then you can insert one row or bulk insert
+**3.** And then you can insert data
+
+One row 
 ```php
-MyAwesomeModel::insert($rows);
+$model = MyTable::create(['model_name' => 'model 1', 'some_param' => 1]);
+# or
+$model = MyTable::make(['model_name' => 'model 1']);
+$model->some_param = 1;
+$model->save();
+# or
+$model = new MyTable();
+$model->fill(['model_name' => 'model 1', 'some_param' => 1])->save();
+```
+Or bulk insert
+```php
+# Non assoc way
+MyTable::insertBulk([['model 1', 1], ['model 2', 2]], ['model_name', 'some_param']);
+# Assoc way
+MyTable::insertAssoc([['model_name' => 'model 1', 'some_param' => 1], ['some_param' => 2, 'model_name' => 'model 2']]);
 ```
 
 **4.** Now check out the query builder 
 ```php
-$rows = MyAwesomeModel::select(['field_one', new RawColumn('sum(field_two)', 'field_two_sum')])
+$rows = MyTable::select(['field_one', new RawColumn('sum(field_two)', 'field_two_sum')])
     ->where('created_at', '>', '2020-09-14 12:47:29')
     ->groupBy('field_one')
     ->getRows();
 ```
+
+## Advanced usage
+
+### Retries
+
+You may enable ability to retry requests while received not 200 response, maybe due network connectivity problems.
+
+Patch your .env:
+```dotenv
+CLICKHOUSE_RETRIES=2
+```
+retries is optional, default value is 0.  
+0 mean only one attempt.  
+1 mean one attempt + 1 retry while error (total 2 attempts).
