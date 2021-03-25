@@ -1,3 +1,8 @@
+## 1.6.0 [2021-03-25]
+
+### Features
+1. Add method BaseModel::optimize
+
 ## 1.5.0 [2020-12-18]
 
 ### Features

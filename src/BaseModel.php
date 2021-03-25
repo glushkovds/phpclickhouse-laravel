@@ -246,4 +246,19 @@ class BaseModel
         $this->setAttribute($key, $value);
     }
 
+    /**
+     * Optimize table. Using for ReplacingMergeTree, etc.
+     * @source https://clickhouse.tech/docs/ru/sql-reference/statements/optimize/
+     * @param bool $final
+     * @return \ClickHouseDB\Statement
+     */
+    public static function optimize($final = false)
+    {
+        $sql = "OPTIMIZE TABLE " . (new static)->getTable();
+        if ($final) {
+            $sql .= " FINAL";
+        }
+        return static::getClient()->write($sql);
+    }
+
 }
