@@ -1,6 +1,7 @@
 # phpClickHouse-laravel
 
 Adapter to Laravel of the most popular libraries:
+
 - https://github.com/smi2/phpClickHouse - for connections and perform queries
 - https://github.com/the-tinderbox/ClickhouseBuilder - good query builder
 
@@ -9,8 +10,9 @@ Adapter to Laravel of the most popular libraries:
 No dependency, only Curl (support php >=7.1 )
 
 More: https://github.com/smi2/phpClickHouse#features
-    
+
 ## Prerequisites
+
 - php 7.1
 - Laravel 7+
 - clickhouse server
@@ -18,11 +20,13 @@ More: https://github.com/smi2/phpClickHouse#features
 ## Installation
 
 **1.**  Install via composer
+
 ```sh
 $ composer require glushkovds/phpclickhouse-laravel
 ```
 
 **2.** Add new connection into your config/database.php:
+
 ```php
 'clickhouse' => [
     'driver' => 'clickhouse',
@@ -39,6 +43,7 @@ $ composer require glushkovds/phpclickhouse-laravel
 ```
 
 Then patch your .env:
+
 ```dotenv
 CLICKHOUSE_HOST=localhost
 CLICKHOUSE_PORT=8123
@@ -52,6 +57,7 @@ CLICKHOUSE_HTTPS=true
 ```
 
 **3.** Add service provider into your config/app.php file providers section:
+
 ```php
 \PhpClickHouseLaravel\ClickhouseServiceProvider::class,
 ```
@@ -59,16 +65,19 @@ CLICKHOUSE_HTTPS=true
 ## Usage
 
 You can use smi2/phpClickHouse functionality directly:
+
 ```php
 /** @var \ClickHouseDB\Client $db */
 $db = DB::connection('clickhouse')->getClient();
 $statement = $db->select('SELECT * FROM summing_url_views LIMIT 2');
 ```
+
 More about `$db` see here: https://github.com/smi2/phpClickHouse/blob/master/README.md
 
 #### Or use dawnings of Eloquent ORM (will be implemented completely)
 
 **1.** Add model
+
 ```php
 <?php
 
@@ -84,7 +93,9 @@ class MyTable extends BaseModel
 
 }
 ```
+
 **2.** Add migration
+
 ```php
 <?php
 
@@ -124,7 +135,8 @@ class CreateMyTable extends \PhpClickHouseLaravel\Migration
 
 **3.** And then you can insert data
 
-One row 
+One row
+
 ```php
 $model = MyTable::create(['model_name' => 'model 1', 'some_param' => 1]);
 # or
@@ -135,7 +147,9 @@ $model->save();
 $model = new MyTable();
 $model->fill(['model_name' => 'model 1', 'some_param' => 1])->save();
 ```
+
 Or bulk insert
+
 ```php
 # Non assoc way
 MyTable::insertBulk([['model 1', 1], ['model 2', 2]], ['model_name', 'some_param']);
@@ -143,7 +157,8 @@ MyTable::insertBulk([['model 1', 1], ['model 2', 2]], ['model_name', 'some_param
 MyTable::insertAssoc([['model_name' => 'model 1', 'some_param' => 1], ['some_param' => 2, 'model_name' => 'model 2']]);
 ```
 
-**4.** Now check out the query builder 
+**4.** Now check out the query builder
+
 ```php
 $rows = MyTable::select(['field_one', new RawColumn('sum(field_two)', 'field_two_sum')])
     ->where('created_at', '>', '2020-09-14 12:47:29')
@@ -158,9 +173,25 @@ $rows = MyTable::select(['field_one', new RawColumn('sum(field_two)', 'field_two
 You may enable ability to retry requests while received not 200 response, maybe due network connectivity problems.
 
 Patch your .env:
+
 ```dotenv
 CLICKHOUSE_RETRIES=2
 ```
+
 retries is optional, default value is 0.  
 0 mean only one attempt.  
 1 mean one attempt + 1 retry while error (total 2 attempts).
+
+### Working with huge rows
+
+You can chunk results like in Laravel
+
+```php
+// Split the result into chunks of 30 rows 
+$rows = MyTable::select(['field_one', 'field_two'])
+    ->chunk(30, function ($rows) {
+        foreach ($rows as $row) {
+            echo $row['field_two'] . "\n";
+        }
+    });
+```

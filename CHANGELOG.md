@@ -1,3 +1,8 @@
+## 1.7.0 [2021-05-24]
+
+### Features
+1. Add method Builder::chunk
+
 ## 1.6.0 [2021-03-25]
 
 ### Features

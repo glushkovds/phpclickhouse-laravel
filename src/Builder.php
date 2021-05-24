@@ -35,4 +35,21 @@ class Builder extends BaseBuilder
     {
         return $this->get()->rows();
     }
+
+    /**
+     * Chunk the results of the query.
+     *
+     * @param int $count
+     * @param callable $callback
+     */
+    public function chunk(int $count, callable $callback)
+    {
+        $offset = 0;
+        do {
+            $rows = $this->limit($count, $offset)->getRows();
+            $callback($rows);
+            $offset += $count;
+        } while ($rows);
+    }
+
 }
