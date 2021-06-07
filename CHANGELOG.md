@@ -1,3 +1,8 @@
+## 1.8.0 [2021-06-07]
+
+### Features
+1. Add BaseModel::$tableForInserts for Buffer engine
+
 ## 1.7.0 [2021-05-24]
 
 ### Features

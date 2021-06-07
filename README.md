@@ -195,3 +195,39 @@ $rows = MyTable::select(['field_one', 'field_two'])
         }
     });
 ```
+
+### Buffer engine for insert queries
+
+See https://clickhouse.tech/docs/en/engines/table-engines/special/buffer/
+
+```php
+<?php
+
+namespace App\Models\Clickhouse;
+
+use PhpClickHouseLaravel\BaseModel;
+
+class MyTable extends BaseModel
+{
+    // Not necessary. Can be obtained from class name MyTable => my_table
+    protected $table = 'my_table';
+    // All inserts will be in the table $tableForInserts 
+    // But all selects will be from $table
+    protected $tableForInserts = 'my_table_buffer';
+}
+```
+
+If you also want to read from your buffer table, put its name in $table
+
+```php
+<?php
+
+namespace App\Models\Clickhouse;
+
+use PhpClickHouseLaravel\BaseModel;
+
+class MyTable extends BaseModel
+{
+    protected $table = 'my_table_buffer';
+}
+```

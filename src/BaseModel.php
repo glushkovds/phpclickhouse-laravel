@@ -22,6 +22,14 @@ class BaseModel
     protected $table;
 
     /**
+     * Use this only when you have Buffer table engine for inserts
+     * @link https://clickhouse.tech/docs/ru/engines/table-engines/special/buffer/
+     *
+     * @var string
+     */
+    protected $tableForInserts;
+
+    /**
      * Indicates if the model exists.
      *
      * @var bool
@@ -36,6 +44,16 @@ class BaseModel
     public function getTable()
     {
         return $this->table ?? Str::snake(Str::pluralStudly(class_basename($this)));
+    }
+
+    /**
+     * Get the table name for insert queries
+     *
+     * @return string
+     */
+    public function getTableForInserts()
+    {
+        return $this->tableForInserts ?? $this->getTable();
     }
 
     /**
@@ -107,7 +125,7 @@ class BaseModel
      */
     public static function insert($rows)
     {
-        return static::getClient()->insert((new static)->getTable(), $rows);
+        return static::getClient()->insert((new static)->getTableForInserts(), $rows);
     }
 
     /**
@@ -119,7 +137,7 @@ class BaseModel
      */
     public static function insertBulk($rows, $columns = [])
     {
-        return static::getClient()->insert((new static)->getTable(), $rows, $columns);
+        return static::getClient()->insert((new static)->getTableForInserts(), $rows, $columns);
     }
 
     /**
@@ -131,7 +149,7 @@ class BaseModel
     public static function prepareAndInsert($rows, $columns = [])
     {
         $rows = array_map('static::prepareFromRequest', $rows, $columns);
-        return static::getClient()->insert((new static)->getTable(), $rows, $columns);
+        return static::getClient()->insert((new static)->getTableForInserts(), $rows, $columns);
     }
 
     /**
@@ -149,7 +167,7 @@ class BaseModel
                 $row = array_replace(array_flip($keys), $row);
             }
         }
-        return static::getClient()->insertAssocBulk((new static)->getTable(), $rows);
+        return static::getClient()->insertAssocBulk((new static)->getTableForInserts(), $rows);
     }
 
     /**
