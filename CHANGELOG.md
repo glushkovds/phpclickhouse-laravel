@@ -1,3 +1,9 @@
+## 1.9.0 [2021-08-25]
+
+### Features
+1. Lumen support
+1. Add InsertArray expression
+
 ## 1.8.0 [2021-06-07]
 
 ### Features

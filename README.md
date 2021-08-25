@@ -1,6 +1,6 @@
 # phpClickHouse-laravel
 
-Adapter to Laravel of the most popular libraries:
+Adapter to Laravel and Lumen of the most popular libraries:
 
 - https://github.com/smi2/phpClickHouse - for connections and perform queries
 - https://github.com/the-tinderbox/ClickhouseBuilder - good query builder
@@ -13,9 +13,9 @@ More: https://github.com/smi2/phpClickHouse#features
 
 ## Prerequisites
 
-- php 7.1
-- Laravel 7+
-- clickhouse server
+- PHP 7.1
+- Laravel/Lumen 7+
+- Clickhouse server
 
 ## Installation
 
@@ -230,4 +230,11 @@ class MyTable extends BaseModel
 {
     protected $table = 'my_table_buffer';
 }
+```
+
+### Helpers for inserting different data types
+
+```php
+// Array data type
+MyTable::insertAssoc([[1,'str',new InsertArray(['a','b'])]]);
 ```
