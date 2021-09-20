@@ -25,6 +25,12 @@ class Connection extends \Illuminate\Database\Connection
         $conn->client->database($config['database']);
         $conn->client->setTimeout($config['timeout_query']);
         $conn->client->setConnectTimeOut($config['timeout_connect']);
+        if ($configSettings =& $config['settings']) {
+            $settings = $conn->getClient()->settings();
+            foreach ($configSettings as $sName => $sValue) {
+                $settings->set($sName, $sValue);
+            }
+        }
         if ($retries = (int)($config['retries'] ?? null)) {
             $curler = new CurlerRollingWithRetries();
             $curler->setRetries($retries);

@@ -1,3 +1,8 @@
+## 1.10.0 [2021-09-20]
+
+### Features
+1. Ability to set connection settings
+
 ## 1.9.0 [2021-08-25]
 
 ### Features
