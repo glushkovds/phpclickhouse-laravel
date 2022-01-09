@@ -8,6 +8,8 @@ use ClickHouseDB\Client;
 
 class Connection extends \Illuminate\Database\Connection
 {
+
+    /** @var Client */
     protected $client;
 
     /**
@@ -18,9 +20,13 @@ class Connection extends \Illuminate\Database\Connection
         return $this->client;
     }
 
+    /**
+     * @param array $config
+     * @return static
+     */
     public static function createWithClient($config)
     {
-        $conn = new static(null, '', '', $config);
+        $conn = new static(null, $config['database'], '', $config);
         $conn->client = new Client($config);
         $conn->client->database($config['database']);
         $conn->client->setTimeout($config['timeout_query']);
@@ -37,6 +43,47 @@ class Connection extends \Illuminate\Database\Connection
             $conn->client->transport()->setDirtyCurler($curler);
         }
         return $conn;
+    }
+
+    /** @inheritDoc */
+    protected function getDefaultQueryGrammar()
+    {
+        return new QueryGrammar();
+    }
+
+    /** @inheritDoc */
+    protected function getDefaultSchemaGrammar()
+    {
+        return new SchemaGrammar();
+    }
+
+    /** @inheritDoc */
+    public function getSchemaBuilder()
+    {
+        if (is_null($this->schemaGrammar)) {
+            $this->useDefaultSchemaGrammar();
+        }
+
+        return new SchemaBuilder($this);
+    }
+
+    /** @inheritDoc */
+    public function select($query, $bindings = [], $useReadPdo = true)
+    {
+        $query = QueryGrammar::prepareParameters($query);
+        return $this->client->select($query, $bindings)->rows();
+    }
+
+    /** @inheritDoc */
+    public function statement($query, $bindings = [])
+    {
+        return !$this->client->write($query, $bindings)->isError();
+    }
+
+    /** @inheritDoc */
+    public function affectingStatement($query, $bindings = [])
+    {
+        return (int)$this->statement($query, $bindings);
     }
 
 }
