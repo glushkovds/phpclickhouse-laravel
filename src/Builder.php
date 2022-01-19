@@ -13,6 +13,9 @@ use Tinderbox\ClickhouseBuilder\Query\Grammar;
 class Builder extends BaseBuilder
 {
 
+    /** @var string */
+    protected $tableSources;
+
     public function __construct()
     {
         $this->grammar = new Grammar();
@@ -50,6 +53,30 @@ class Builder extends BaseBuilder
             $callback($rows);
             $offset += $count;
         } while ($rows);
+    }
+
+    /**
+     * For delete query
+     * @param string $table
+     * @return $this
+     */
+    public function setSourcesTable(string $table)
+    {
+        $this->tableSources = $table;
+        return $this;
+    }
+
+    /**
+     * Note! This is a heavy operation not designed for frequent use.
+     * @return Statement
+     */
+    public function delete()
+    {
+        $table = $this->tableSources ?? $this->getFrom()->getTable();
+        $sql = "ALTER TABLE $table DELETE " . $this->grammar->compileWheresComponent($this, $this->getWheres());
+        /** @var Client $db */
+        $db = DB::connection('clickhouse')->getClient();
+        return $db->write($sql);
     }
 
 }

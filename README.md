@@ -235,6 +235,40 @@ class MyTable extends BaseModel
 }
 ```
 
+### OPTIMIZE Statement
+
+See https://clickhouse.com/docs/ru/sql-reference/statements/optimize/
+
+```php
+MyTable::optimize($final = false, $partition = null);
+```
+
+### Deletions
+
+See https://clickhouse.com/docs/en/sql-reference/statements/alter/delete/
+
+```php
+MyTable::where('field_one', 123)->delete();
+```
+
+Using buffer engine and performing OPTIMIZE or ALTER TABLE DELETE
+
+```php
+<?php
+
+namespace App\Models\Clickhouse;
+
+use PhpClickHouseLaravel\BaseModel;
+
+class MyTable extends BaseModel
+{
+    // All SELECT's and INSERT's on $table
+    protected $table = 'my_table_buffer';
+    // OPTIMIZE and DELETE on $tableSources
+    protected $tableSources = 'my_table';
+}
+```
+
 ### Helpers for inserting different data types
 
 ```php

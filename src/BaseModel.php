@@ -8,6 +8,8 @@ use ClickHouseDB\Client;
 use Illuminate\Database\Eloquent\Concerns\HasAttributes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Tinderbox\ClickhouseBuilder\Query\Enums\Operator;
+use Tinderbox\ClickhouseBuilder\Query\TwoElementsLogicExpression;
 
 class BaseModel
 {
@@ -28,6 +30,13 @@ class BaseModel
      * @var string
      */
     protected $tableForInserts;
+
+    /**
+     * Use this field for OPTIMIZE TABLE OR ALTER TABLE (also DELETE) queries
+     *
+     * @var string
+     */
+    protected $tableSources;
 
     /**
      * Indicates if the model exists.
@@ -54,6 +63,15 @@ class BaseModel
     public function getTableForInserts()
     {
         return $this->tableForInserts ?? $this->getTable();
+    }
+
+    /**
+     * Use this field for OPTIMIZE TABLE OR ALTER TABLE (also DELETE) queries
+     * @return string
+     */
+    public function getTableSources()
+    {
+        return $this->tableSources ?? $this->getTable();
     }
 
     /**
@@ -268,15 +286,54 @@ class BaseModel
      * Optimize table. Using for ReplacingMergeTree, etc.
      * @source https://clickhouse.tech/docs/ru/sql-reference/statements/optimize/
      * @param bool $final
+     * @param string|null $partition
      * @return \ClickHouseDB\Statement
      */
-    public static function optimize($final = false)
+    public static function optimize($final = false, $partition = null)
     {
-        $sql = "OPTIMIZE TABLE " . (new static)->getTable();
+        $sql = "OPTIMIZE TABLE " . (new static)->getTableSources();
+        if ($partition) {
+            $sql .= " PARTITION $partition";
+        }
         if ($final) {
             $sql .= " FINAL";
         }
         return static::getClient()->write($sql);
+    }
+
+    /**
+     * @param TwoElementsLogicExpression|string|Closure $column
+     * @param string|null $operator
+     * @param int|float|string|null $value
+     * @param string $concatOperator Operator::AND for example
+     * @return Builder
+     */
+    public static function where($column, $operator = null, $value = null, string $concatOperator = Operator::AND)
+    {
+        $static = new static;
+        $builder = (new Builder)->select(['*'])
+            ->from($static->getTable())
+            ->setSourcesTable($static->getTableSources());
+        if (is_null($value)) {
+            // Fix func_num_args() in where clause in BaseBuilder
+            $builder->where($column, $operator);
+        } else {
+            $builder->where($column, $operator, $value, $concatOperator);
+        }
+        return $builder;
+    }
+
+    /**
+     * @param string $expression
+     * @return Builder
+     */
+    public static function whereRaw(string $expression)
+    {
+        $static = new static;
+        return (new Builder)->select(['*'])
+            ->from($static->getTable())
+            ->setSourcesTable($static->getTableSources())
+            ->whereRaw($expression);
     }
 
 }
