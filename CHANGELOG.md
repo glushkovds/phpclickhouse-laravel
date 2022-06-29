@@ -2,6 +2,7 @@
 
 ### Features
 1. Add simple events
+1. Add PHP 8 support
 
 ## 1.12.0 [2022-01-19]
 
