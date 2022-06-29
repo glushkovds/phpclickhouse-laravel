@@ -1,4 +1,6 @@
-## 1.14 [2022-03-24]
+## 1.14 [2022-06-29]
+
+### Features
 1. Add simple events
 
 ## 1.12.0 [2022-01-19]
@@ -8,7 +10,7 @@
 
 ## 1.11.0 [2022-01-09]
 
-### Features
+### Fixed
 1. Fix issue #8: Migrations on standalone Clickhouse database
 
 ## 1.10.0 [2021-09-20]
