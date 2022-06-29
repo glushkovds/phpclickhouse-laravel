@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace PhpClickHouseLaravel\Expressions;
-
 
 use ClickHouseDB\Query\Expression\Expression;
 
@@ -24,7 +24,11 @@ class InsertArray implements Expression
 
     private $expression;
 
-    public function __construct(array $items, $type = self::TYPE_STRING)
+    /**
+     * @param array $items
+     * @param string $type
+     */
+    public function __construct(array $items, string $type = self::TYPE_STRING)
     {
         if (self::TYPE_INT == $type) {
             $this->expression = "[" . implode(",", array_map('intval', $items)) . "]";
@@ -39,11 +43,17 @@ class InsertArray implements Expression
         }
     }
 
+    /**
+     * @return bool
+     */
     public function needsEncoding(): bool
     {
         return false;
     }
 
+    /**
+     * @return string
+     */
     public function getValue(): string
     {
         return $this->expression;

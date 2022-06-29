@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace PhpClickHouseLaravel;
-
 
 use Tinderbox\ClickhouseBuilder\Query\Expression;
 
@@ -20,5 +20,7 @@ class RawColumn extends Expression
         if ($alias) {
             $this->value .= " AS `$alias`";
         }
+
+        parent::__construct($value);
     }
 }

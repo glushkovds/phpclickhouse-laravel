@@ -13,7 +13,7 @@ More: https://github.com/smi2/phpClickHouse#features
 
 ## Prerequisites
 
-- PHP 7.1
+- PHP 7.1, 8.0
 - Laravel/Lumen 7+
 - Clickhouse server
 
@@ -150,6 +150,8 @@ $model->save();
 $model = new MyTable();
 $model->fill(['model_name' => 'model 1', 'some_param' => 1])->save();
 ```
+When a new model is saved for the first time, the **creating** and **created** events will dispatch (working just like an [eloquent model events](https://laravel.com/docs/9.x/eloquent#events)
+
 
 Or bulk insert
 
