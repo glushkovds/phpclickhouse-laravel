@@ -150,6 +150,8 @@ $model->save();
 $model = new MyTable();
 $model->fill(['model_name' => 'model 1', 'some_param' => 1])->save();
 ```
+When a new model is saved for the first time, the **creating** and **created** events will dispatch (working just like an [eloquent model events](https://laravel.com/docs/9.x/eloquent#events)
+
 
 Or bulk insert
 
