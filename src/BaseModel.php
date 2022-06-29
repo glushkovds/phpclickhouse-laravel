@@ -1,11 +1,16 @@
 <?php
 
+declare(strict_types=1);
 
 namespace PhpClickHouseLaravel;
 
-
 use ClickHouseDB\Client;
+use ClickHouseDB\Statement;
+use Exception;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Concerns\HasAttributes;
+use Illuminate\Database\Eloquent\Concerns\HasEvents;
+use Illuminate\Database\Eloquent\Concerns\HidesAttributes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tinderbox\ClickhouseBuilder\Query\Enums\Operator;
@@ -13,8 +18,9 @@ use Tinderbox\ClickhouseBuilder\Query\TwoElementsLogicExpression;
 
 class BaseModel
 {
-
     use HasAttributes;
+    use HidesAttributes;
+    use HasEvents;
 
     /**
      * The table associated with the model.
@@ -46,11 +52,18 @@ class BaseModel
     public $exists = false;
 
     /**
+     * The event dispatcher instance.
+     *
+     * @var Dispatcher
+     */
+    protected static $dispatcher;
+
+    /**
      * Get the table associated with the model.
      *
      * @return string
      */
-    public function getTable()
+    public function getTable(): string
     {
         return $this->table ?? Str::snake(Str::pluralStudly(class_basename($this)));
     }
@@ -60,7 +73,7 @@ class BaseModel
      *
      * @return string
      */
-    public function getTableForInserts()
+    public function getTableForInserts(): string
     {
         return $this->tableForInserts ?? $this->getTable();
     }
@@ -69,7 +82,7 @@ class BaseModel
      * Use this field for OPTIMIZE TABLE OR ALTER TABLE (also DELETE) queries
      * @return string
      */
-    public function getTableSources()
+    public function getTableSources(): string
     {
         return $this->tableSources ?? $this->getTable();
     }
@@ -77,7 +90,7 @@ class BaseModel
     /**
      * @return Client
      */
-    public static function getClient()
+    public static function getClient(): Client
     {
         return DB::connection('clickhouse')->getClient();
     }
@@ -87,10 +100,11 @@ class BaseModel
      * @param array $attributes
      * @return static
      */
-    public static function make($attributes = [])
+    public static function make(array $attributes = [])
     {
         $model = new static;
         $model->fill($attributes);
+
         return $model;
     }
 
@@ -98,12 +112,17 @@ class BaseModel
      * Save a new model and return the instance.
      * @param array $attributes
      * @return static
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function create($attributes = [])
+    public static function create(array $attributes = [])
     {
         $model = static::make($attributes);
-        $model->save();
+        $model->fireModelEvent('creating', false);
+
+        if ($model->save()) {
+            $model->fireModelEvent('created', false);
+        }
+
         return $model;
     }
 
@@ -112,11 +131,12 @@ class BaseModel
      * @param array $attributes
      * @return $this
      */
-    public function fill(array $attributes)
+    public function fill(array $attributes): self
     {
         foreach ($attributes as $key => $value) {
             $this->setAttribute($key, $value);
         }
+
         return $this;
     }
 
@@ -124,24 +144,27 @@ class BaseModel
      * Save the model to the database.
      * @param array $options
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
-    public function save(array $options = [])
+    public function save(array $options = []): bool
     {
         if ($this->exists) {
-            throw new \Exception("Clickhouse does not allow update rows");
+            throw new Exception("Clickhouse does not allow update rows");
         }
         $this->exists = !static::insertAssoc([$this->getAttributes()])->isError();
+
+        $this->fireModelEvent('saved', false);
+
         return $this->exists;
     }
 
     /**
      * Bulk insert into Clickhouse database
      * @param array[] $rows
-     * @return \ClickHouseDB\Statement
+     * @return Statement
      * @deprecated use insertBulk
      */
-    public static function insert($rows)
+    public static function insert(array $rows): Statement
     {
         return static::getClient()->insert((new static)->getTableForInserts(), $rows);
     }
@@ -150,10 +173,10 @@ class BaseModel
      * Bulk insert into Clickhouse database
      * @param array[] $rows
      * @param array $columns
-     * @return \ClickHouseDB\Statement
+     * @return Statement
      * @example MyModel::insertBulk([['model 1', 1], ['model 2', 2]], ['model_name', 'some_param']);
      */
-    public static function insertBulk($rows, $columns = [])
+    public static function insertBulk(array $rows, array $columns = []): Statement
     {
         return static::getClient()->insert((new static)->getTableForInserts(), $rows, $columns);
     }
@@ -162,21 +185,23 @@ class BaseModel
      * Prepare each row by calling static::prepareFromRequest to bulk insert into database
      * @param array[] $rows
      * @param array $columns
-     * @return \ClickHouseDB\Statement
+     * @return Statement
      */
-    public static function prepareAndInsert($rows, $columns = [])
+    public static function prepareAndInsert(array $rows, array $columns = []): Statement
     {
         $rows = array_map('static::prepareFromRequest', $rows, $columns);
-        return static::getClient()->insert((new static)->getTableForInserts(), $rows, $columns);
+
+        return static::getClient()
+            ->insert((new static)->getTableForInserts(), $rows, $columns);
     }
 
     /**
      * Bulk insert rows as associative array into Clickhouse database
      * @param array[] $rows
-     * @return \ClickHouseDB\Statement
+     * @return Statement
      * @example MyModel::insertAssoc([['model_name' => 'model 1', 'some_param' => 1], ['model_name' => 'model 2', 'some_param' => 2]]);
      */
-    public static function insertAssoc($rows)
+    public static function insertAssoc(array $rows): Statement
     {
         $rows = array_values($rows);
         if (isset($rows[0]) && isset($rows[1])) {
@@ -191,9 +216,9 @@ class BaseModel
     /**
      * Prepare each row by calling static::prepareAssocFromRequest to bulk insert into database
      * @param array[] $rows
-     * @return \ClickHouseDB\Statement
+     * @return Statement
      */
-    public static function prepareAndInsertAssoc($rows)
+    public static function prepareAndInsertAssoc(array $rows): Statement
     {
         $rows = array_map('static::prepareAssocFromRequest', $rows);
         return static::insertAssoc($rows);
@@ -206,7 +231,7 @@ class BaseModel
      * @param array $columns
      * @return array
      */
-    public static function prepareFromRequest($row, $columns = [])
+    public static function prepareFromRequest(array $row, array $columns = []): array
     {
         return $row;
     }
@@ -217,7 +242,7 @@ class BaseModel
      * @param array $row
      * @return array
      */
-    public static function prepareAssocFromRequest($row)
+    public static function prepareAssocFromRequest(array $row): array
     {
         return $row;
     }
@@ -226,7 +251,7 @@ class BaseModel
      * @param array $select optional = ['*']
      * @return Builder
      */
-    public static function select($select = ['*'])
+    public static function select(array $select = ['*']): Builder
     {
         return (new Builder)->select($select)->from((new static)->getTable());
     }
@@ -235,7 +260,7 @@ class BaseModel
      * Necessary stub for HasAttributes trait
      * @return array
      */
-    public function getCasts()
+    public function getCasts(): array
     {
         return $this->casts;
     }
@@ -244,7 +269,7 @@ class BaseModel
      * Necessary stub for HasAttributes trait
      * @return bool
      */
-    public function usesTimestamps()
+    public function usesTimestamps(): bool
     {
         return false;
     }
@@ -265,7 +290,7 @@ class BaseModel
      * @param string $key
      * @return mixed
      */
-    public function __get($key)
+    public function __get(string $key)
     {
         return $this->getAttribute($key);
     }
@@ -277,7 +302,7 @@ class BaseModel
      * @param mixed $value
      * @return void
      */
-    public function __set($key, $value)
+    public function __set(string $key, $value): void
     {
         $this->setAttribute($key, $value);
     }
@@ -287,9 +312,9 @@ class BaseModel
      * @source https://clickhouse.tech/docs/ru/sql-reference/statements/optimize/
      * @param bool $final
      * @param string|null $partition
-     * @return \ClickHouseDB\Statement
+     * @return Statement
      */
-    public static function optimize($final = false, $partition = null)
+    public static function optimize(bool $final = false, ?string $partition = null): Statement
     {
         $sql = "OPTIMIZE TABLE " . (new static)->getTableSources();
         if ($partition) {
@@ -298,6 +323,7 @@ class BaseModel
         if ($final) {
             $sql .= " FINAL";
         }
+
         return static::getClient()->write($sql);
     }
 
@@ -320,6 +346,7 @@ class BaseModel
         } else {
             $builder->where($column, $operator, $value, $concatOperator);
         }
+
         return $builder;
     }
 
@@ -327,13 +354,13 @@ class BaseModel
      * @param string $expression
      * @return Builder
      */
-    public static function whereRaw(string $expression)
+    public static function whereRaw(string $expression):Builder
     {
         $static = new static;
+
         return (new Builder)->select(['*'])
             ->from($static->getTable())
             ->setSourcesTable($static->getTableSources())
             ->whereRaw($expression);
     }
-
 }

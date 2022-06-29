@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PhpClickHouseLaravel;
 
 use ClickHouseDB\Transport\CurlerRequest;
+use ClickHouseDB\Transport\CurlerRolling;
 
-class CurlerRollingWithRetries extends \ClickHouseDB\Transport\CurlerRolling
+class CurlerRollingWithRetries extends CurlerRolling
 {
-
     /**
      * @var int 0 mean only one attempt, 1 mean one attempt + 1 retry while error (2 total attempts)
      */
@@ -20,6 +22,7 @@ class CurlerRollingWithRetries extends \ClickHouseDB\Transport\CurlerRolling
         while ($attempts-- && 200 !== $httpCode) {
             $httpCode = parent::execOne($request, $auto_close);
         }
+
         return $httpCode;
     }
 

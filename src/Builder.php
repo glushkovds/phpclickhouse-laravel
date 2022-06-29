@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace PhpClickHouseLaravel;
-
 
 use ClickHouseDB\Client;
 use ClickHouseDB\Statement;
@@ -24,17 +24,18 @@ class Builder extends BaseBuilder
     /**
      * @return Statement
      */
-    public function get()
+    public function get(): Statement
     {
         /** @var Client $db */
         $db = DB::connection('clickhouse')->getClient();
+
         return $db->select($this->toSql());
     }
 
     /**
      * @return array
      */
-    public function getRows()
+    public function getRows(): array
     {
         return $this->get()->rows();
     }
@@ -45,7 +46,7 @@ class Builder extends BaseBuilder
      * @param int $count
      * @param callable $callback
      */
-    public function chunk(int $count, callable $callback)
+    public function chunk(int $count, callable $callback): void
     {
         $offset = 0;
         do {
@@ -60,9 +61,10 @@ class Builder extends BaseBuilder
      * @param string $table
      * @return $this
      */
-    public function setSourcesTable(string $table)
+    public function setSourcesTable(string $table): self
     {
         $this->tableSources = $table;
+
         return $this;
     }
 
@@ -70,12 +72,13 @@ class Builder extends BaseBuilder
      * Note! This is a heavy operation not designed for frequent use.
      * @return Statement
      */
-    public function delete()
+    public function delete(): Statement
     {
         $table = $this->tableSources ?? $this->getFrom()->getTable();
         $sql = "ALTER TABLE $table DELETE " . $this->grammar->compileWheresComponent($this, $this->getWheres());
         /** @var Client $db */
         $db = DB::connection('clickhouse')->getClient();
+
         return $db->write($sql);
     }
 

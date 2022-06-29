@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
 
 namespace PhpClickHouseLaravel;
 
-
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -11,14 +12,19 @@ use Illuminate\Support\ServiceProvider;
  */
 class ClickhouseServiceProvider extends ServiceProvider
 {
-    public function boot()
+    /**
+     * @throws BindingResolutionException
+     */
+    public function boot(): void
     {
         $db = $this->app->make('db');
 
         $db->extend('clickhouse', function ($config, $name) {
             $config['name'] = $name;
-            $conn = Connection::createWithClient($config);
-            return $conn;
+
+            return Connection::createWithClient($config);
         });
+
+        BaseModel::setEventDispatcher($this->app['events']);
     }
 }

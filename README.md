@@ -13,7 +13,7 @@ More: https://github.com/smi2/phpClickHouse#features
 
 ## Prerequisites
 
-- PHP 7.1
+- PHP 7.1, 8.0
 - Laravel/Lumen 7+
 - Clickhouse server
 

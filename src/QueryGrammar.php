@@ -1,24 +1,24 @@
 <?php
 
+declare(strict_types=1);
 
 namespace PhpClickHouseLaravel;
-
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\Grammar;
 
 class QueryGrammar extends Grammar
 {
-
     const PARAMETER_SIGN = '#@?';
 
     /** @inheritDoc */
-    public function parameterize(array $values)
+    public function parameterize(array $values): string
     {
         $params = [];
         for ($i = 0; $i < count($values); $i++) {
             $params[] = ":$i";
         }
+
         return implode(', ', $params);
     }
 
@@ -39,18 +39,19 @@ class QueryGrammar extends Grammar
      * @param string $sql
      * @return string
      */
-    public static function prepareParameters($sql)
+    public static function prepareParameters(string $sql): string
     {
         $parameterNum = 0;
         while (($pos = strpos($sql, QueryGrammar::PARAMETER_SIGN)) !== false) {
             $sql = substr_replace($sql, ":$parameterNum", $pos, strlen(QueryGrammar::PARAMETER_SIGN));
             $parameterNum++;
         }
+
         return $sql;
     }
 
     /** @inheritDoc */
-    protected function compileDeleteWithoutJoins(Builder $query, $table, $where)
+    protected function compileDeleteWithoutJoins(Builder $query, $table, $where): string
     {
         return "alter table {$table} delete {$where}";
     }

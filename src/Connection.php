@@ -1,21 +1,21 @@
 <?php
 
+declare(strict_types=1);
 
 namespace PhpClickHouseLaravel;
 
-
 use ClickHouseDB\Client;
+use Illuminate\Database\Connection as BaseConnection;
 
-class Connection extends \Illuminate\Database\Connection
+class Connection extends BaseConnection
 {
-
     /** @var Client */
     protected $client;
 
     /**
      * @return Client
      */
-    public function getClient()
+    public function getClient(): Client
     {
         return $this->client;
     }
@@ -24,7 +24,7 @@ class Connection extends \Illuminate\Database\Connection
      * @param array $config
      * @return static
      */
-    public static function createWithClient($config)
+    public static function createWithClient(array $config)
     {
         $conn = new static(null, $config['database'], '', $config);
         $conn->client = new Client($config);
@@ -42,6 +42,7 @@ class Connection extends \Illuminate\Database\Connection
             $curler->setRetries($retries);
             $conn->client->transport()->setDirtyCurler($curler);
         }
+
         return $conn;
     }
 
@@ -68,22 +69,22 @@ class Connection extends \Illuminate\Database\Connection
     }
 
     /** @inheritDoc */
-    public function select($query, $bindings = [], $useReadPdo = true)
+    public function select($query, $bindings = [], $useReadPdo = true): array
     {
         $query = QueryGrammar::prepareParameters($query);
+
         return $this->client->select($query, $bindings)->rows();
     }
 
     /** @inheritDoc */
-    public function statement($query, $bindings = [])
+    public function statement($query, $bindings = []): bool
     {
         return !$this->client->write($query, $bindings)->isError();
     }
 
     /** @inheritDoc */
-    public function affectingStatement($query, $bindings = [])
+    public function affectingStatement($query, $bindings = []): int
     {
         return (int)$this->statement($query, $bindings);
     }
-
 }

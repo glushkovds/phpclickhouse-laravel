@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace PhpClickHouseLaravel;
-
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Schema\Grammars\Grammar;
@@ -10,13 +10,12 @@ use Illuminate\Support\Fluent;
 
 class SchemaGrammar extends Grammar
 {
-
     /**
      * Compile the query to determine the list of tables.
      *
      * @return string
      */
-    public function compileTableExists()
+    public function compileTableExists(): string
     {
         return "select * from system.tables where database = :0 and name = :1";
     }
@@ -24,12 +23,12 @@ class SchemaGrammar extends Grammar
     /**
      * Compile a create table command.
      *
-     * @param \Illuminate\Database\Schema\Blueprint $blueprint
-     * @param \Illuminate\Support\Fluent $command
-     * @param \Illuminate\Database\Connection $connection
+     * @param Blueprint $blueprint
+     * @param Fluent $command
+     * @param Connection $connection
      * @return array
      */
-    public function compileCreate(Blueprint $blueprint, Fluent $command, Connection $connection)
+    public function compileCreate(Blueprint $blueprint, Fluent $command, Connection $connection): array
     {
         $sql = "CREATE TABLE :table (
                 :columns
@@ -43,16 +42,17 @@ class SchemaGrammar extends Grammar
             ':orderBy' => $orderBy,
         ];
         $sql = str_replace(array_keys($bindings), array_values($bindings), $sql);
+
         return [$sql];
     }
 
     /**
      * Compile the blueprint's column definitions.
      *
-     * @param \Illuminate\Database\Schema\Blueprint $blueprint
+     * @param Blueprint $blueprint
      * @return array
      */
-    protected function getColumns(Blueprint $blueprint)
+    protected function getColumns(Blueprint $blueprint): array
     {
         $columns = [];
 
@@ -67,10 +67,10 @@ class SchemaGrammar extends Grammar
     /**
      * Create the column definition for an integer type.
      *
-     * @param \Illuminate\Support\Fluent $column
+     * @param Fluent $column
      * @return string
      */
-    protected function typeInteger(Fluent $column)
+    protected function typeInteger(Fluent $column): string
     {
         return 'Int32';
     }
@@ -78,10 +78,10 @@ class SchemaGrammar extends Grammar
     /**
      * Create the column definition for a big integer type.
      *
-     * @param \Illuminate\Support\Fluent $column
+     * @param Fluent $column
      * @return string
      */
-    protected function typeBigInteger(Fluent $column)
+    protected function typeBigInteger(Fluent $column): string
     {
         return 'Int64';
     }
@@ -89,10 +89,10 @@ class SchemaGrammar extends Grammar
     /**
      * Create the column definition for a string type.
      *
-     * @param \Illuminate\Support\Fluent $column
+     * @param Fluent $column
      * @return string
      */
-    protected function typeString(Fluent $column)
+    protected function typeString(Fluent $column): string
     {
         return 'String';
     }
@@ -100,10 +100,10 @@ class SchemaGrammar extends Grammar
     /**
      * Create the column definition for a timestamp type.
      *
-     * @param \Illuminate\Support\Fluent $column
+     * @param Fluent $column
      * @return string
      */
-    protected function typeTimestamp(Fluent $column)
+    protected function typeTimestamp(Fluent $column): string
     {
         return 'DateTime';
     }
@@ -111,10 +111,10 @@ class SchemaGrammar extends Grammar
     /**
      * Create the column definition for a text type.
      *
-     * @param \Illuminate\Support\Fluent $column
+     * @param Fluent $column
      * @return string
      */
-    protected function typeText(Fluent $column)
+    protected function typeText(Fluent $column): string
     {
         return 'String';
     }
@@ -122,10 +122,10 @@ class SchemaGrammar extends Grammar
     /**
      * Create the column definition for a long text type.
      *
-     * @param \Illuminate\Support\Fluent $column
+     * @param Fluent $column
      * @return string
      */
-    protected function typeLongText(Fluent $column)
+    protected function typeLongText(Fluent $column): string
     {
         return 'String';
     }
