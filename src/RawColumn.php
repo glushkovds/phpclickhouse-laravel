@@ -16,11 +16,9 @@ class RawColumn extends Expression
      */
     public function __construct($value, $alias = null)
     {
-        $this->value = $value;
         if ($alias) {
-            $this->value .= " AS `$alias`";
+            $value .= " AS `$alias`";
         }
-
         parent::__construct($value);
     }
 }

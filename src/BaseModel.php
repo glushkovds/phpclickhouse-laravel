@@ -248,10 +248,10 @@ class BaseModel
     }
 
     /**
-     * @param array $select optional = ['*']
+     * @param string|array|RawColumn $select optional = ['*']
      * @return Builder
      */
-    public static function select(array $select = ['*']): Builder
+    public static function select($select = ['*']): Builder
     {
         return (new Builder)->select($select)->from((new static)->getTable());
     }

@@ -29,8 +29,8 @@ class Connection extends BaseConnection
         $conn = new static(null, $config['database'], '', $config);
         $conn->client = new Client($config);
         $conn->client->database($config['database']);
-        $conn->client->setTimeout($config['timeout_query']);
-        $conn->client->setConnectTimeOut($config['timeout_connect']);
+        $conn->client->setTimeout((int)$config['timeout_query']);
+        $conn->client->setConnectTimeOut((int)$config['timeout_connect']);
         if ($configSettings =& $config['settings']) {
             $settings = $conn->getClient()->settings();
             foreach ($configSettings as $sName => $sValue) {
