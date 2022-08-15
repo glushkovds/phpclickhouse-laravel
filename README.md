@@ -249,6 +249,14 @@ See https://clickhouse.com/docs/ru/sql-reference/statements/optimize/
 MyTable::optimize($final = false, $partition = null);
 ```
 
+### TRUNCATE Statement
+
+Removes all data from a table.
+
+```php
+MyTable::truncate();
+```
+
 ### Deletions
 
 See https://clickhouse.com/docs/en/sql-reference/statements/alter/delete/

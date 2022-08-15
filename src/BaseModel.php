@@ -327,6 +327,11 @@ class BaseModel
         return static::getClient()->write($sql);
     }
 
+    public static function truncate(): Statement
+    {
+        return static::getClient()->write('TRUNCATE TABLE ' . (new static())->getTableSources());
+    }
+
     /**
      * @param TwoElementsLogicExpression|string|Closure $column
      * @param string|null $operator

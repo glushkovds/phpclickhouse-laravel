@@ -1,3 +1,8 @@
+## 1.15 [2022-08-15]
+
+### Features
+1. Add method BaseModel::truncate
+
 ## 1.14 [2022-06-29]
 
 ### Features
