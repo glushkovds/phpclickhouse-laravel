@@ -15,10 +15,13 @@ class Builder extends BaseBuilder
 
     /** @var string */
     protected $tableSources;
+    /** @var Client */
+    protected $client;
 
-    public function __construct()
+    public function __construct(Client $client = null)
     {
         $this->grammar = new Grammar();
+        $this->client = $client ?? DB::connection('clickhouse')->getClient();
     }
 
     /**
@@ -26,10 +29,7 @@ class Builder extends BaseBuilder
      */
     public function get(): Statement
     {
-        /** @var Client $db */
-        $db = DB::connection('clickhouse')->getClient();
-
-        return $db->select($this->toSql());
+        return $this->client->select($this->toSql());
     }
 
     /**
@@ -76,10 +76,7 @@ class Builder extends BaseBuilder
     {
         $table = $this->tableSources ?? $this->getFrom()->getTable();
         $sql = "ALTER TABLE $table DELETE " . $this->grammar->compileWheresComponent($this, $this->getWheres());
-        /** @var Client $db */
-        $db = DB::connection('clickhouse')->getClient();
-
-        return $db->write($sql);
+        return $this->client->write($sql);
     }
 
 }

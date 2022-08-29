@@ -253,7 +253,7 @@ class BaseModel
      */
     public static function select($select = ['*']): Builder
     {
-        return (new Builder)->select($select)->from((new static)->getTable());
+        return (new Builder(static::getClient()))->select($select)->from((new static())->getTable());
     }
 
     /**
@@ -342,7 +342,7 @@ class BaseModel
     public static function where($column, $operator = null, $value = null, string $concatOperator = Operator::AND)
     {
         $static = new static;
-        $builder = (new Builder)->select(['*'])
+        $builder = (new Builder(static::getClient()))->select(['*'])
             ->from($static->getTable())
             ->setSourcesTable($static->getTableSources());
         if (is_null($value)) {
@@ -359,11 +359,11 @@ class BaseModel
      * @param string $expression
      * @return Builder
      */
-    public static function whereRaw(string $expression):Builder
+    public static function whereRaw(string $expression): Builder
     {
         $static = new static;
 
-        return (new Builder)->select(['*'])
+        return (new Builder(static::getClient()))->select(['*'])
             ->from($static->getTable())
             ->setSourcesTable($static->getTableSources())
             ->whereRaw($expression);
