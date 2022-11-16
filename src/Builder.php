@@ -79,4 +79,14 @@ class Builder extends BaseBuilder
         return $this->client->write($sql);
     }
 
+    /**
+     * Makes clean instance of builder.
+     *
+     * @return self
+     */
+    public function newQuery(): self
+    {
+        return new static($this->client);
+    }
+
 }
