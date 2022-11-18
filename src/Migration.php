@@ -18,6 +18,16 @@ class Migration extends BaseMigration
      */
     protected static function write(string $sql, array $bindings = []): Statement
     {
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 6);
+        $isPretend = $trace['5']['function'] == 'pretend';
+
+        if ($isPretend) {
+            $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+            $name = static::class;
+            $output->writeln("<comment>Clickhouse</comment> <info>{$name}:</info> $sql");
+            return new Statement(new \ClickHouseDB\Transport\CurlerRequest());
+        }
+
         /** @var Client $client */
         $client = DB::connection('clickhouse')->getClient();
 
