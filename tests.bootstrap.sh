@@ -12,7 +12,7 @@ cp -r /src/tests/* /app/tests
 # Configuring environment
 cp /src/tests/config/database.php /app/config/database.php
 cp /src/tests/config/app.php /app/config/app.php
-cp /src/tests/migrations/exampleTable.php /app/database/migrations/2022_11_11_120334_example.php
+cp /src/tests/migrations/exampleTable.php /app/database/migrations/2022_01_01_000000_example.php
 cat /src/tests/config/.env >> /app/.env
 
 # Running tests

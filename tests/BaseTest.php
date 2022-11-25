@@ -42,4 +42,27 @@ class BaseTest extends TestCase
         $rows = $query->getRows();
         $this->assertNotEmpty($rows);
     }
+
+    public function testPretendMigration()
+    {
+        /** @var \ClickHouseDB\Client $db */
+        $db = DB::connection('clickhouse')->getClient();
+        $migration = file_get_contents(base_path('database/migrations/2022_01_01_000000_example.php'));
+
+        // Default mode
+        $tableName = 'examples_' . rand(0, 9999999999999999);
+        $migrationTmp = str_replace('examples', $tableName, $migration);
+        file_put_contents(base_path('database/migrations/example_' . rand(0, 9999999999999999) . '.php'), $migrationTmp);
+        Artisan::call('migrate');
+        $exist = $db->select("EXISTS $tableName")->fetchOne('result');
+        $this->assertEquals(1, $exist);
+
+        // Pretend mode
+        $tableName = 'examples_' . rand(0, 9999999999999999);
+        $migrationTmp = str_replace('examples', $tableName, $migration);
+        file_put_contents(base_path('database/migrations/example_' . rand(0, 9999999999999999) . '.php'), $migrationTmp);
+        Artisan::call('migrate', ['--pretend' => true]);
+        $exist = $db->select("EXISTS $tableName")->fetchOne('result');
+        $this->assertEquals(0, $exist);
+    }
 }
