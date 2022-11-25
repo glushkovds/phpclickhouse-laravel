@@ -1,3 +1,5 @@
+![Tests](https://github.com/glushkovds/phpclickhouse-laravel/actions/workflows/test.yml/badge.svg)
+
 # phpClickHouse-laravel
 
 Adapter to Laravel and Lumen of the most popular libraries:
