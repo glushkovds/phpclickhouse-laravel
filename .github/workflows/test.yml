@@ -1,0 +1,12 @@
+name: CI Tests
+on: [push]
+jobs:
+
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the Docker image
+        run: docker-compose -f docker-compose.test.yaml run php sh /src/tests.bootstrap.sh
