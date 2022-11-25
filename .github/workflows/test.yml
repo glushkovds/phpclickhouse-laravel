@@ -8,5 +8,5 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Build the Docker image
+      - name: Tests
         run: docker-compose -f docker-compose.test.yaml run php sh /src/tests.bootstrap.sh
