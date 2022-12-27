@@ -13,6 +13,7 @@ return new class extends \PhpClickHouseLaravel\Migration {
             CREATE TABLE examples (
                 created_at DateTime64 DEFAULT now64(),
                 f_int Int64,
+                f_int2 Int64,
                 f_string String
             )
             ENGINE = MergeTree()

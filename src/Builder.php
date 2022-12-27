@@ -80,13 +80,22 @@ class Builder extends BaseBuilder
     }
 
     /**
-     * Makes clean instance of builder.
-     *
-     * @return self
+     * Note! This is a heavy operation not designed for frequent use.
+     * @return Statement
      */
-    public function newQuery(): self
+    public function update(array $values): Statement
     {
-        return new static($this->client);
+        if (empty($values)) {
+            throw QueryException::cannotUpdateEmptyValues();
+        }
+        $table = $this->tableSources ?? $this->getFrom()->getTable();
+        $set = [];
+        foreach ($values as $key => $value) {
+            $set[] = "`$key` = " . $this->grammar->wrap($value);
+        }
+        $sql = "ALTER TABLE $table UPDATE " . implode(', ', $set) . ' '
+            . $this->grammar->compileWheresComponent($this, $this->getWheres());
+        return $this->client->write($sql);
     }
 
 }

@@ -178,7 +178,6 @@ $rows = MyTable::select(['field_one', new RawColumn('sum(field_two)', 'field_two
 Events work just like an [eloquent model events](https://laravel.com/docs/9.x/eloquent#events)  
 Available events: **creating**, **created**, **saved**
 
-
 ### Retries
 
 You may enable ability to retry requests while received not 200 response, maybe due network connectivity problems.
@@ -285,9 +284,20 @@ class MyTable extends BaseModel
 }
 ```
 
+### Updates
+
+See https://clickhouse.com/docs/ru/sql-reference/statements/alter/update/
+
+```php
+MyTable::where('field_one', 123)->update(['field_two' => 'new_val']);
+// or expression
+MyTable::where('field_one', 123)
+    ->update(['field_two' => new RawColumn("concat(field_two,'new_val')")]);
+```
+
 ### Helpers for inserting different data types
 
 ```php
 // Array data type
-MyTable::insertAssoc([[1,'str',new InsertArray(['a','b'])]]);
+MyTable::insertAssoc([[1, 'str', new InsertArray(['a','b'])]]);
 ```

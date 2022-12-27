@@ -1,3 +1,8 @@
+## 1.16 [2022-12-27]
+
+### Features
+1. Added update rows ability
+
 ## 1.15 [2022-08-15]
 
 ### Features
