@@ -7,6 +7,7 @@ namespace PhpClickHouseLaravel;
 use ClickHouseDB\Client;
 use ClickHouseDB\Statement;
 use Illuminate\Support\Facades\DB;
+use PhpClickHouseLaravel\Exceptions\QueryException;
 use Tinderbox\ClickhouseBuilder\Query\BaseBuilder;
 use Tinderbox\ClickhouseBuilder\Query\Grammar;
 
