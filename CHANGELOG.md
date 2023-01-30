@@ -1,3 +1,8 @@
+## 1.16.1 [2023-01-30]
+
+### Bug fixes
+1. Fix complying with psr-4 autoload standard \PhpClickHouseLaravel\Exceptions\QueryException
+
 ## 1.16 [2022-12-27]
 
 ### Features
