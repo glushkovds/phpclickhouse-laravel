@@ -1,6 +1,6 @@
 <?php
 
-namespace PhpClickHouseLaravel;
+namespace PhpClickHouseLaravel\Exceptions;
 
 
 class QueryException extends \ClickHouseDB\Exception\QueryException
