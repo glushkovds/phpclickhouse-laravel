@@ -318,7 +318,7 @@ class BaseModel
     {
         $sql = "OPTIMIZE TABLE " . (new static)->getTableSources();
         if ($partition) {
-            $sql .= " PARTITION $partition";
+            $sql .= " PARTITION '$partition'";
         }
         if ($final) {
             $sql .= " FINAL";

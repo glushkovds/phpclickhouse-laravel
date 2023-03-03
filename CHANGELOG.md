@@ -1,3 +1,8 @@
+## 1.16.2 [2023-03-03]
+
+### Bug fixes
+1. Quoted partition name in "optimize table" statement
+
 ## 1.16.1 [2023-01-30]
 
 ### Bug fixes
