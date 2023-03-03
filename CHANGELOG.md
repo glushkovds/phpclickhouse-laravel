@@ -1,3 +1,8 @@
+## 1.16.3 [2023-03-03]
+
+### Bug fixes
+1. Laravel/Lumen 10+ support
+
 ## 1.16.2 [2023-03-03]
 
 ### Bug fixes
