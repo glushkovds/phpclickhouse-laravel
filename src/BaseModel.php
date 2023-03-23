@@ -57,6 +57,14 @@ class BaseModel
      * @var Dispatcher
      */
     protected static $dispatcher;
+    
+    
+    /**
+     * The name of connection.
+     *
+     * @var string
+     */
+    public $connection = 'clickhouse';
 
     /**
      * Get the table associated with the model.
@@ -92,7 +100,7 @@ class BaseModel
      */
     public static function getClient(): Client
     {
-        return DB::connection('clickhouse')->getClient();
+        return DB::connection($this->connection)->getClient();
     }
 
     /**
