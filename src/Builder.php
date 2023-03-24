@@ -14,15 +14,24 @@ use Tinderbox\ClickhouseBuilder\Query\Grammar;
 class Builder extends BaseBuilder
 {
 
+    use WithClient;
+
     /** @var string */
     protected $tableSources;
     /** @var Client */
     protected $client;
 
+    /**
+     * The name of the database connection to use.
+     *
+     * @var string|null
+     */
+    protected $connection = Connection::DEFAULT_NAME;
+
     public function __construct(Client $client = null)
     {
         $this->grammar = new Grammar();
-        $this->client = $client ?? DB::connection('clickhouse')->getClient();
+        $this->client = $client ?? $this->getClient();
     }
 
     /**

@@ -21,6 +21,7 @@ class BaseModel
     use HasAttributes;
     use HidesAttributes;
     use HasEvents;
+    use WithClient;
 
     /**
      * The table associated with the model.
@@ -57,14 +58,13 @@ class BaseModel
      * @var Dispatcher
      */
     protected static $dispatcher;
-    
-    
+
     /**
-     * The name of connection.
+     * The name of the database connection to use.
      *
      * @var string
      */
-    public $connection = 'clickhouse';
+    protected $connection = Connection::DEFAULT_NAME;
 
     /**
      * Get the table associated with the model.
@@ -93,14 +93,6 @@ class BaseModel
     public function getTableSources(): string
     {
         return $this->tableSources ?? $this->getTable();
-    }
-
-    /**
-     * @return Client
-     */
-    public static function getClient(): Client
-    {
-        return DB::connection($this->connection)->getClient();
     }
 
     /**
@@ -174,7 +166,8 @@ class BaseModel
      */
     public static function insert(array $rows): Statement
     {
-        return static::getClient()->insert((new static)->getTableForInserts(), $rows);
+        $instance = new static();
+        return $instance->getClient()->insert($instance->getTableForInserts(), $rows);
     }
 
     /**
@@ -186,7 +179,8 @@ class BaseModel
      */
     public static function insertBulk(array $rows, array $columns = []): Statement
     {
-        return static::getClient()->insert((new static)->getTableForInserts(), $rows, $columns);
+        $instance = new static();
+        return $instance->getClient()->insert($instance->getTableForInserts(), $rows, $columns);
     }
 
     /**
@@ -198,9 +192,8 @@ class BaseModel
     public static function prepareAndInsert(array $rows, array $columns = []): Statement
     {
         $rows = array_map('static::prepareFromRequest', $rows, $columns);
-
-        return static::getClient()
-            ->insert((new static)->getTableForInserts(), $rows, $columns);
+        $instance = new static();
+        return $instance->getClient()->insert($instance->getTableForInserts(), $rows, $columns);
     }
 
     /**
@@ -218,7 +211,8 @@ class BaseModel
                 $row = array_replace(array_flip($keys), $row);
             }
         }
-        return static::getClient()->insertAssocBulk((new static)->getTableForInserts(), $rows);
+        $instance = new static();
+        return $instance->getClient()->insertAssocBulk($instance->getTableForInserts(), $rows);
     }
 
     /**
@@ -261,7 +255,8 @@ class BaseModel
      */
     public static function select($select = ['*']): Builder
     {
-        return (new Builder(static::getClient()))->select($select)->from((new static())->getTable());
+        $instance = new static();
+        return (new Builder($instance->getClient()))->select($select)->from($instance->getTable());
     }
 
     /**
@@ -324,7 +319,8 @@ class BaseModel
      */
     public static function optimize(bool $final = false, ?string $partition = null): Statement
     {
-        $sql = "OPTIMIZE TABLE " . (new static)->getTableSources();
+        $instance = new static();
+        $sql = "OPTIMIZE TABLE " . $instance->getTableSources();
         if ($partition) {
             $sql .= " PARTITION '$partition'";
         }
@@ -332,27 +328,28 @@ class BaseModel
             $sql .= " FINAL";
         }
 
-        return static::getClient()->write($sql);
+        return $instance->getClient()->write($sql);
     }
 
     public static function truncate(): Statement
     {
-        return static::getClient()->write('TRUNCATE TABLE ' . (new static())->getTableSources());
+        $instance = new static();
+        return $instance->getClient()->write('TRUNCATE TABLE ' . $instance->getTableSources());
     }
 
     /**
      * @param TwoElementsLogicExpression|string|Closure $column
-     * @param string|null $operator
+     * @param int|float|string|null $operator or $value
      * @param int|float|string|null $value
      * @param string $concatOperator Operator::AND for example
      * @return Builder
      */
-    public static function where($column, $operator = null, $value = null, string $concatOperator = Operator::AND)
+    public static function where($column, $operator = null, $value = null, string $concatOperator = Operator::AND): Builder
     {
-        $static = new static;
-        $builder = (new Builder(static::getClient()))->select(['*'])
-            ->from($static->getTable())
-            ->setSourcesTable($static->getTableSources());
+        $instance = new static();
+        $builder = (new Builder($instance->getClient()))->select(['*'])
+            ->from($instance->getTable())
+            ->setSourcesTable($instance->getTableSources());
         if (is_null($value)) {
             // Fix func_num_args() in where clause in BaseBuilder
             $builder->where($column, $operator);
@@ -369,11 +366,10 @@ class BaseModel
      */
     public static function whereRaw(string $expression): Builder
     {
-        $static = new static;
-
-        return (new Builder(static::getClient()))->select(['*'])
-            ->from($static->getTable())
-            ->setSourcesTable($static->getTableSources())
+        $instance = new static();
+        return (new Builder($instance->getClient()))->select(['*'])
+            ->from($instance->getTable())
+            ->setSourcesTable($instance->getTableSources())
             ->whereRaw($expression);
     }
 }

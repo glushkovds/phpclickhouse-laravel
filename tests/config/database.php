@@ -50,6 +50,19 @@ return [
                 'max_partitions_per_insert_block' => 300,
             ],
         ],
+
+        'clickhouse2' => [
+            'driver' => 'clickhouse',
+            'host' => 'clickhouse2',
+            'port' => '8123',
+            'database' => 'default',
+            'username' => 'default',
+            'password' => '',
+            'timeout_connect' => 2,
+            'timeout_query' => 2,
+            'https' => false,
+            'retries' => 0,
+        ],
     ],
 
     /*

@@ -9,6 +9,9 @@ use Illuminate\Database\Connection as BaseConnection;
 
 class Connection extends BaseConnection
 {
+
+    public const DEFAULT_NAME = 'clickhouse';
+
     /** @var Client */
     protected $client;
 

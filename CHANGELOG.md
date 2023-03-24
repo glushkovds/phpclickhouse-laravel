@@ -1,3 +1,8 @@
+## 1.17.0 [2023-03-24]
+
+### Features
+1. Working with multiple Clickhouse instances in a project
+
 ## 1.16.3 [2023-03-03]
 
 ### Bug fixes

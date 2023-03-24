@@ -301,3 +301,60 @@ MyTable::where('field_one', 123)
 // Array data type
 MyTable::insertAssoc([[1, 'str', new InsertArray(['a','b'])]]);
 ```
+
+### Working with multiple Clickhouse instances in a project
+
+**1.** Add second connection into your config/database.php:
+
+```php
+'clickhouse2' => [
+    'driver' => 'clickhouse',
+    'host' => 'clickhouse2',
+    'port' => '8123',
+    'database' => 'default',
+    'username' => 'default',
+    'password' => '',
+    'timeout_connect' => 2,
+    'timeout_query' => 2,
+    'https' => false,
+    'retries' => 0,
+],
+```
+
+**2.** Add model
+
+```php
+<?php
+
+
+namespace App\Models\Clickhouse;
+
+use PhpClickHouseLaravel\BaseModel;
+
+class MyTable2 extends BaseModel
+{
+    protected $connection = 'clickhouse2';
+    
+    protected $table = 'my_table2';
+}
+```
+**3.** Add migration
+
+```php
+<?php
+
+return new class extends \PhpClickHouseLaravel\Migration
+{
+    protected $connection = 'clickhouse2';
+    
+    public function up()
+    {
+        static::write('CREATE TABLE my_table2 ...');
+    }
+    
+    public function down()
+    {
+        static::write('DROP TABLE my_table2');
+    }
+};
+```
