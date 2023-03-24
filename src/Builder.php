@@ -31,7 +31,7 @@ class Builder extends BaseBuilder
     public function __construct(Client $client = null)
     {
         $this->grammar = new Grammar();
-        $this->client = $client ?? $this->getClient();
+        $this->client = $client ?? $this->getThisClient();
     }
 
     /**

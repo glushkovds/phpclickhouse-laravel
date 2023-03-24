@@ -167,7 +167,7 @@ class BaseModel
     public static function insert(array $rows): Statement
     {
         $instance = new static();
-        return $instance->getClient()->insert($instance->getTableForInserts(), $rows);
+        return $instance->getThisClient()->insert($instance->getTableForInserts(), $rows);
     }
 
     /**
@@ -180,7 +180,7 @@ class BaseModel
     public static function insertBulk(array $rows, array $columns = []): Statement
     {
         $instance = new static();
-        return $instance->getClient()->insert($instance->getTableForInserts(), $rows, $columns);
+        return $instance->getThisClient()->insert($instance->getTableForInserts(), $rows, $columns);
     }
 
     /**
@@ -193,7 +193,7 @@ class BaseModel
     {
         $rows = array_map('static::prepareFromRequest', $rows, $columns);
         $instance = new static();
-        return $instance->getClient()->insert($instance->getTableForInserts(), $rows, $columns);
+        return $instance->getThisClient()->insert($instance->getTableForInserts(), $rows, $columns);
     }
 
     /**
@@ -212,7 +212,7 @@ class BaseModel
             }
         }
         $instance = new static();
-        return $instance->getClient()->insertAssocBulk($instance->getTableForInserts(), $rows);
+        return $instance->getThisClient()->insertAssocBulk($instance->getTableForInserts(), $rows);
     }
 
     /**
@@ -256,7 +256,7 @@ class BaseModel
     public static function select($select = ['*']): Builder
     {
         $instance = new static();
-        return (new Builder($instance->getClient()))->select($select)->from($instance->getTable());
+        return (new Builder($instance->getThisClient()))->select($select)->from($instance->getTable());
     }
 
     /**
@@ -328,13 +328,13 @@ class BaseModel
             $sql .= " FINAL";
         }
 
-        return $instance->getClient()->write($sql);
+        return $instance->getThisClient()->write($sql);
     }
 
     public static function truncate(): Statement
     {
         $instance = new static();
-        return $instance->getClient()->write('TRUNCATE TABLE ' . $instance->getTableSources());
+        return $instance->getThisClient()->write('TRUNCATE TABLE ' . $instance->getTableSources());
     }
 
     /**
@@ -347,7 +347,7 @@ class BaseModel
     public static function where($column, $operator = null, $value = null, string $concatOperator = Operator::AND): Builder
     {
         $instance = new static();
-        $builder = (new Builder($instance->getClient()))->select(['*'])
+        $builder = (new Builder($instance->getThisClient()))->select(['*'])
             ->from($instance->getTable())
             ->setSourcesTable($instance->getTableSources());
         if (is_null($value)) {
@@ -367,7 +367,7 @@ class BaseModel
     public static function whereRaw(string $expression): Builder
     {
         $instance = new static();
-        return (new Builder($instance->getClient()))->select(['*'])
+        return (new Builder($instance->getThisClient()))->select(['*'])
             ->from($instance->getTable())
             ->setSourcesTable($instance->getTableSources())
             ->whereRaw($expression);
