@@ -12,7 +12,7 @@ class RawColumn extends Expression
      * Create a new raw query expression.
      *
      * @param mixed $value
-     * @param null $alias
+     * @param string|null $alias
      */
     public function __construct($value, $alias = null)
     {
