@@ -33,5 +33,10 @@
     "psr-4": {
       "PhpClickHouseLaravel\\": "src/"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
   }
 }
