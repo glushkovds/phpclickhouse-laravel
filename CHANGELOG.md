@@ -1,3 +1,8 @@
+## 1.18.0 [2023-07-10]
+
+### Features
+1. Added the settings clause to the select query builder
+
 ## 1.17.0 [2023-03-24]
 
 ### Features

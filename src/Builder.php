@@ -6,10 +6,8 @@ namespace PhpClickHouseLaravel;
 
 use ClickHouseDB\Client;
 use ClickHouseDB\Statement;
-use Illuminate\Support\Facades\DB;
 use PhpClickHouseLaravel\Exceptions\QueryException;
 use Tinderbox\ClickhouseBuilder\Query\BaseBuilder;
-use Tinderbox\ClickhouseBuilder\Query\Grammar;
 
 class Builder extends BaseBuilder
 {
@@ -20,6 +18,7 @@ class Builder extends BaseBuilder
     protected $tableSources;
     /** @var Client */
     protected $client;
+    protected $settings = [];
 
     /**
      * The name of the database connection to use.
@@ -32,6 +31,23 @@ class Builder extends BaseBuilder
     {
         $this->grammar = new Grammar();
         $this->client = $client ?? $this->getThisClient();
+    }
+
+    /**
+     * Set the SETTINGS clause for the SELECT statement.
+     * @link https://clickhouse.com/docs/en/sql-reference/statements/select#settings-in-select-query
+     * @param array $settings For example: [max_threads => 3]
+     * @return $this
+     */
+    public function settings(array $settings): self
+    {
+        $this->settings = $settings;
+        return $this;
+    }
+
+    public function getSettings(): array
+    {
+        return $this->settings;
     }
 
     /**

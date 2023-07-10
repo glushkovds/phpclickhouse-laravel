@@ -168,6 +168,7 @@ MyTable::insertAssoc([['model_name' => 'model 1', 'some_param' => 1], ['some_par
 $rows = MyTable::select(['field_one', new RawColumn('sum(field_two)', 'field_two_sum')])
     ->where('created_at', '>', '2020-09-14 12:47:29')
     ->groupBy('field_one')
+    ->settings(['max_threads' => 3])
     ->getRows();
 ```
 
