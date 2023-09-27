@@ -53,6 +53,13 @@ class BaseModel
     public $exists = false;
 
     /**
+     * Indicates if the model was inserted during the current request lifecycle.
+     *
+     * @var bool
+     */
+    public $wasRecentlyCreated = false;
+
+    /**
      * The event dispatcher instance.
      *
      * @var Dispatcher
@@ -120,6 +127,8 @@ class BaseModel
         $model->fireModelEvent('creating', false);
 
         if ($model->save()) {
+            $model->wasRecentlyCreated = true;
+
             $model->fireModelEvent('created', false);
         }
 
@@ -352,8 +361,12 @@ class BaseModel
      * @param string $concatOperator Operator::AND for example
      * @return Builder
      */
-    public static function where($column, $operator = null, $value = null, string $concatOperator = Operator::AND): Builder
-    {
+    public static function where(
+        $column,
+        $operator = null,
+        $value = null,
+        string $concatOperator = Operator::AND
+    ): Builder {
         $instance = new static();
         $builder = $instance->newQuery()->select(['*'])
             ->from($instance->getTable())
@@ -379,5 +392,39 @@ class BaseModel
             ->from($instance->getTable())
             ->setSourcesTable($instance->getTableSources())
             ->whereRaw($expression);
+    }
+
+
+    /**
+     * Get the dynamic relation resolver if defined or inherited, or return null.
+     *
+     * @param $class
+     * @param $key
+     * @return mixed|null
+     */
+    public function relationResolver($class, $key)
+    {
+        return null;
+    }
+
+    /**
+     * Determine if the given relation is loaded.
+     *
+     * @param $key
+     * @return mixed|null
+     */
+    public function relationLoaded($key)
+    {
+        return false;
+    }
+
+    /**
+     * Determine if accessing missing attributes is disabled.
+     *
+     * @return bool
+     */
+    public static function preventsAccessingMissingAttributes()
+    {
+        return false;
     }
 }
