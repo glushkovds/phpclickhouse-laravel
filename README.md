@@ -66,6 +66,7 @@ CLICKHOUSE_HTTPS=true
 ```php
 \PhpClickHouseLaravel\ClickhouseServiceProvider::class,
 ```
+It should be placed *before* App\Providers\AppServiceProvider::class, and   App\Providers\EventServiceProvider::class.
 
 ## Usage
 
