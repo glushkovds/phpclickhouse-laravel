@@ -18,7 +18,7 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8124:8123"
+      - "18123:8123"
 
   clickhouse2:
     image: yandex/clickhouse-server

@@ -10,11 +10,11 @@ return new class extends \PhpClickHouseLaravel\Migration {
     {
         static::write(
             "
-            CREATE TABLE IF NOT EXISTS examples (
+            CREATE TABLE IF NOT EXISTS examples3 (
                 created_at DateTime64 DEFAULT now64(),
                 f_int Int64,
-                f_int2 Int64,
-                f_string String
+                f_string String,
+                f_bool Bool
             )
             ENGINE = MergeTree()
             ORDER BY (f_int)
@@ -29,6 +29,6 @@ return new class extends \PhpClickHouseLaravel\Migration {
      */
     public function down()
     {
-        static::write('DROP TABLE examples');
+        static::write('DROP TABLE examples3');
     }
 };

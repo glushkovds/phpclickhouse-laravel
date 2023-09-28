@@ -175,6 +175,32 @@ $rows = MyTable::select(['field_one', new RawColumn('sum(field_two)', 'field_two
 
 ## Advanced usage
 
+### Columns casting
+
+Before insertion, the column will be converted to the required data type specified in the field `$casts`.  
+This feature does not apply to data selection.  
+The supported cast types are: `boolean`.
+
+```php
+namespace App\Models\Clickhouse;
+
+use PhpClickHouseLaravel\BaseModel;
+
+class MyTable extends BaseModel
+{
+    /**
+     * The columns that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = ['some_bool_column' => 'boolean'];
+}
+// Then you can insert the data like this:
+MyTable::insertAssoc([
+    ['some_param' => 1, 'some_bool_column' => false],
+]);
+```
+
 ### Events
 
 Events work just like an [eloquent model events](https://laravel.com/docs/9.x/eloquent#events)  

@@ -161,9 +161,7 @@ class BaseModel
             throw new Exception("Clickhouse does not allow update rows");
         }
         $this->exists = !static::insertAssoc([$this->getAttributes()])->isError();
-
         $this->fireModelEvent('saved', false);
-
         return $this->exists;
     }
 
@@ -189,6 +187,17 @@ class BaseModel
     public static function insertBulk(array $rows, array $columns = []): Statement
     {
         $instance = new static();
+        if ($castsAssoc = (new static())->casts) {
+            $casts = [];
+            foreach ($castsAssoc as $castColumn => $castType) {
+                if ($index = array_search($castColumn, $columns)) {
+                    $casts[$index] = $castType;
+                }
+            }
+            foreach ($rows as &$row) {
+                $row = static::castRow($row, $casts);
+            }
+        }
         return $instance->getThisClient()->insert($instance->getTableForInserts(), $rows, $columns);
     }
 
@@ -220,6 +229,11 @@ class BaseModel
                 $row = array_replace(array_flip($keys), $row);
             }
         }
+        if ($casts = (new static())->casts) {
+            foreach ($rows as &$row) {
+                $row = static::castRow($row, $casts);
+            }
+        }
         $instance = new static();
         return $instance->getThisClient()->insertAssocBulk($instance->getTableForInserts(), $rows);
     }
@@ -236,7 +250,7 @@ class BaseModel
     }
 
     /**
-     * Prepare row to insert into DB, non associative array
+     * Prepare row to insert into DB, non-associative array
      * Need to overwrite in nested models
      * @param array $row
      * @param array $columns
@@ -255,6 +269,18 @@ class BaseModel
      */
     public static function prepareAssocFromRequest(array $row): array
     {
+        return $row;
+    }
+
+    protected static function castRow(array $row, array $casts): array
+    {
+        foreach ($casts as $index => $castType) {
+            $value = $row[$index];
+            if ('boolean' == $castType) {
+                $value = (int)(bool)$value;
+            }
+            $row[$index] = $value;
+        }
         return $row;
     }
 

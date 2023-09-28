@@ -1,3 +1,8 @@
+## 1.19.0 [2023-09-28]
+
+### Features
+1. Added column casting feature for data insertion
+
 ## 1.18.0 [2023-07-10]
 
 ### Features

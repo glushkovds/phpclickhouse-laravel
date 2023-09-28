@@ -13,7 +13,7 @@ return new class extends \PhpClickHouseLaravel\Migration {
     {
         static::write(
             "
-            CREATE TABLE examples2 (
+            CREATE TABLE IF NOT EXISTS examples2 (
                 created_at DateTime64 DEFAULT now64(),
                 f_int Int64,
                 f_int2 Int64,
