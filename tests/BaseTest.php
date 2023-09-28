@@ -4,6 +4,7 @@ namespace Tests;
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use PhpClickHouseLaravel\Builder;
 use Tests\Models\Example;
 
 class BaseTest extends TestCase
@@ -64,5 +65,13 @@ class BaseTest extends TestCase
         Artisan::call('migrate', ['--pretend' => true]);
         $exist = $db->select("EXISTS $tableName")->fetchOne('result');
         $this->assertEquals(0, $exist);
+    }
+
+    public function testOrWhere()
+    {
+        $query = Example::select()->where(function (Builder $q) {
+            $q->where('f_int', 1)->orWhere('f_int', 2);
+        });
+        $this->assertEquals("SELECT * FROM `examples` WHERE (`f_int` = 1 OR `f_int` = 2)", $query->toSql());
     }
 }

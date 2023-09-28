@@ -124,4 +124,9 @@ class Builder extends BaseBuilder
         return $this->client->write($sql);
     }
 
+    public function newQuery(): self
+    {
+        return new static($this->client);
+    }
+
 }
