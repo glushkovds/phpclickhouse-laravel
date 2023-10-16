@@ -72,7 +72,32 @@ class BaseModel
      * @var string
      */
     protected $connection = Connection::DEFAULT_NAME;
+    
+    /**
+     * Determine if an attribute or relation exists on the model.
+     * The __isset magic method is triggered by calling isset() or empty() on inaccessible properties.
+     *
+     * @param  string  $key  The name of the attribute or relation.
+     * @return bool  True if the attribute or relation exists, false otherwise.
+     */
+    public function __isset($key)
+    {
+        if (array_key_exists($key, $this->attributes)) {
+            return true;
+        }
 
+        $accessor = 'get' . Str::studly($key) . 'Attribute';
+        if (method_exists($this, $accessor)) {
+            return true;
+        }
+
+        if (array_key_exists($key, $this->relations)) {
+            return true;
+        }
+
+        return false;
+    }
+    
     /**
      * Get the table associated with the model.
      *
