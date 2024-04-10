@@ -119,6 +119,11 @@ class SchemaGrammar extends Grammar
         return 'String';
     }
 
+    protected function typeMediumText(Fluent $column): string
+    {
+        return 'String';
+    }
+
     /**
      * Create the column definition for a long text type.
      *
