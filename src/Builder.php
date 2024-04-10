@@ -53,17 +53,17 @@ class Builder extends BaseBuilder
     /**
      * @return Statement
      */
-    public function get(): Statement
+    public function get(array $bindings = []): Statement
     {
-        return $this->client->select($this->toSql());
+        return $this->client->select($this->toSql(), $bindings);
     }
 
     /**
      * @return array
      */
-    public function getRows(): array
+    public function getRows(array $bindings = []): array
     {
-        return $this->get()->rows();
+        return $this->get($bindings)->rows();
     }
 
     /**
