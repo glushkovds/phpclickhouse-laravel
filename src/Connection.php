@@ -93,9 +93,7 @@ class Connection extends BaseConnection
     /** @inheritDoc */
     public function affectingStatement($query, $bindings = []): int
     {
-        return $this->run($query, $bindings, function ($query, $bindings) {
-            return (int)$this->statement($query, $bindings);
-        });
+        return (int)$this->statement($query, $bindings);
     }
 
     /** @inheritDoc */
