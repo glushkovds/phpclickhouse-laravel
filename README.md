@@ -61,7 +61,7 @@ CLICKHOUSE_TIMEOUT_QUERY=2
 CLICKHOUSE_HTTPS=true
 ```
 
-**3.** Add service provider into your config/app.php file providers section:
+**3.** Add service provider into your config/app.php (bootstrap/providers.php for Laravel 11+) file providers section:
 
 ```php
 \PhpClickHouseLaravel\ClickhouseServiceProvider::class,
