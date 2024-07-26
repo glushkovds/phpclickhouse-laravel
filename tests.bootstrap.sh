@@ -15,6 +15,7 @@ cp /src/tests/config/app.php /app/config/app.php
 cp /src/tests/migrations/exampleTable.php /app/database/migrations/2022_01_01_000000_example.php
 cp /src/tests/migrations/example2Table.php /app/database/migrations/2022_01_01_000001_example.php
 cp /src/tests/migrations/example3Table.php /app/database/migrations/2022_01_01_000002_example.php
+cp /src/tests/migrations/example4Table.php /app/database/migrations/2022_01_01_000003_example.php
 cat /src/tests/config/.env >> /app/.env
 
 # Creating test tables

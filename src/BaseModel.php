@@ -72,12 +72,12 @@ class BaseModel
      * @var string
      */
     protected $connection = Connection::DEFAULT_NAME;
-    
+
     /**
      * Determine if an attribute or relation exists on the model.
      * The __isset magic method is triggered by calling isset() or empty() on inaccessible properties.
      *
-     * @param  string  $key  The name of the attribute or relation.
+     * @param string $key The name of the attribute or relation.
      * @return bool  True if the attribute or relation exists, false otherwise.
      */
     public function __isset($key)
@@ -97,7 +97,7 @@ class BaseModel
 
         return false;
     }
-    
+
     /**
      * Get the table associated with the model.
      *
@@ -193,18 +193,6 @@ class BaseModel
     /**
      * Bulk insert into Clickhouse database
      * @param array[] $rows
-     * @return Statement
-     * @deprecated use insertBulk
-     */
-    public static function insert(array $rows): Statement
-    {
-        $instance = new static();
-        return $instance->getThisClient()->insert($instance->getTableForInserts(), $rows);
-    }
-
-    /**
-     * Bulk insert into Clickhouse database
-     * @param array[] $rows
      * @param array $columns
      * @return Statement
      * @example MyModel::insertBulk([['model 1', 1], ['model 2', 2]], ['model_name', 'some_param']);
@@ -231,6 +219,21 @@ class BaseModel
      * @param array[] $rows
      * @param array $columns
      * @return Statement
+     */
+    public static function prepareAndInsertBulk(array $rows, array $columns = []): Statement
+    {
+        return static::insertBulk(
+            array_map('static::prepareFromRequest', $rows, $columns),
+            $columns
+        );
+    }
+
+    /**
+     * Prepare each row by calling static::prepareFromRequest to bulk insert into database
+     * @param array[] $rows
+     * @param array $columns
+     * @return Statement
+     * @deprecated use prepareAndInsertBulk
      */
     public static function prepareAndInsert(array $rows, array $columns = []): Statement
     {
@@ -319,9 +322,6 @@ class BaseModel
         return $instance->newQuery()->select($select)->from($instance->getTable());
     }
 
-    /**
-     * @return Builder
-     */
     protected function newQuery(): Builder
     {
         return new Builder($this->getThisClient());

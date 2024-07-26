@@ -17,7 +17,7 @@
     }
   ],
   "require": {
-    "php": ">=7.1.0|>=8.0",
+    "php": ">=8.0",
     "smi2/phpclickhouse": "^1.4.2",
     "the-tinderbox/clickhouse-builder": "^6.0",
     "illuminate/support": ">=7",

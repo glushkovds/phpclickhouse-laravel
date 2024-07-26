@@ -20,4 +20,9 @@ trait WithClient
     {
         return DB::connection((new static())->connection)->getClient();
     }
+
+    public function resolveConnection(): Connection
+    {
+        return DB::connection($this->connection);
+    }
 }

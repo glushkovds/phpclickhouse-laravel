@@ -10,43 +10,36 @@ use Illuminate\Database\Connection as BaseConnection;
 
 class Connection extends BaseConnection
 {
-
     public const DEFAULT_NAME = 'clickhouse';
 
-    /** @var Client */
-    protected $client;
+    protected Cluster $cluster;
 
-    /**
-     * @return Client
-     */
+    public function getCluster(): Cluster
+    {
+        return $this->cluster;
+    }
+
     public function getClient(): Client
     {
-        return $this->client;
+        return $this->cluster->getActiveNode();
     }
 
     /**
      * @param array $config
      * @return static
      */
-    public static function createWithClient(array $config)
+    public static function createWithClient(array $config): self
     {
         $conn = new static(null, $config['database'], '', $config);
-        $conn->client = new Client($config);
-        $conn->client->database($config['database']);
-        $conn->client->setTimeout((int)$config['timeout_query']);
-        $conn->client->setConnectTimeOut((int)$config['timeout_connect']);
-        if ($configSettings =& $config['settings']) {
-            $settings = $conn->getClient()->settings();
-            foreach ($configSettings as $sName => $sValue) {
-                $settings->set($sName, $sValue);
+        $nodeConfigs = [];
+        if ($cluster = $config['cluster'] ?? null) {
+            foreach ($cluster as $node) {
+                $nodeConfigs[] = $node + $config;
             }
+        } else {
+            $nodeConfigs[] = $config;
         }
-        if ($retries = (int)($config['retries'] ?? null)) {
-            $curler = new CurlerRollingWithRetries();
-            $curler->setRetries($retries);
-            $conn->client->transport()->setDirtyCurler($curler);
-        }
-
+        $conn->cluster = new Cluster($nodeConfigs);
         return $conn;
     }
 
@@ -76,9 +69,8 @@ class Connection extends BaseConnection
     public function select($query, $bindings = [], $useReadPdo = true): array
     {
         $query = QueryGrammar::prepareParameters($query);
-
         return $this->run($query, $bindings, function ($query, $bindings) {
-            return $this->client->select($query, $bindings)->rows();
+            return $this->cluster->getActiveNode()->select($query, $bindings)->rows();
         });
     }
 
@@ -86,7 +78,7 @@ class Connection extends BaseConnection
     public function statement($query, $bindings = []): bool
     {
         return $this->run($query, $bindings, function ($query, $bindings) {
-            return !$this->client->write($query, $bindings)->isError();
+            return !$this->cluster->getActiveNode()->write($query, $bindings)->isError();
         });
     }
 

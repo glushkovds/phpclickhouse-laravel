@@ -5,25 +5,29 @@ services:
   php:
     build: tests/docker
     depends_on:
-      - clickhouse
-      - clickhouse2
+      - clickhouse01
+      - clickhouse02
+      - zookeeper
     volumes:
       - ./:/src
 
-  clickhouse:
+  clickhouse01:
     image: yandex/clickhouse-server
-    ulimits:
-      nproc: 65535
-      nofile:
-        soft: 262144
-        hard: 262144
     ports:
       - "18123:8123"
+    depends_on:
+      - zookeeper
+    volumes:
+      - ./tests/docker/clickhouse01:/etc/clickhouse-server
 
-  clickhouse2:
+  clickhouse02:
     image: yandex/clickhouse-server
-    ulimits:
-      nproc: 65535
-      nofile:
-        soft: 262144
-        hard: 262144
+    ports:
+      - "18124:8123"
+    depends_on:
+      - zookeeper
+    volumes:
+      - ./tests/docker/clickhouse02:/etc/clickhouse-server
+
+  zookeeper:
+    image: zookeeper:3.7

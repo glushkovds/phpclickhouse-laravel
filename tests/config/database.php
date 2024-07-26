@@ -53,8 +53,50 @@ return [
 
         'clickhouse2' => [
             'driver' => 'clickhouse',
-            'host' => 'clickhouse2',
+            'host' => 'clickhouse02',
             'port' => '8123',
+            'database' => 'default',
+            'username' => 'default',
+            'password' => '',
+            'timeout_connect' => 2,
+            'timeout_query' => 2,
+            'https' => false,
+            'retries' => 0,
+        ],
+
+        'clickhouse-cluster' => [
+            'driver' => 'clickhouse',
+            'cluster' => [
+                [
+                    'host' => 'clickhouse01',
+                    'port' => '8123',
+                ],
+                [
+                    'host' => 'clickhouse02',
+                    'port' => '8123',
+                ],
+            ],
+            'database' => 'default',
+            'username' => 'default',
+            'password' => '',
+            'timeout_connect' => 2,
+            'timeout_query' => 2,
+            'https' => false,
+            'retries' => 0,
+        ],
+
+        'problem-clickhouse-cluster' => [
+            'driver' => 'clickhouse',
+            'cluster' => [
+                [
+                    'host' => 'clickhouse03', // non-existent node
+                    'port' => '8123',
+                ],
+                [
+                    'host' => 'clickhouse02',
+                    'port' => '8123',
+                ],
+            ],
             'database' => 'default',
             'username' => 'default',
             'password' => '',

@@ -33,6 +33,6 @@ class Migration extends BaseMigration
                 return new Statement(new CurlerRequest());
             }
         }
-        return $instance->getThisClient()->write($sql, $bindings);
+        return $instance->resolveConnection()->getCluster()->write($sql, $bindings);
     }
 }

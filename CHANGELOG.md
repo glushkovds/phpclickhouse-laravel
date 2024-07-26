@@ -1,3 +1,13 @@
+## 2.0.0 [2024-07-26]
+
+### Features
+1. ClickHouse cluster support
+
+### Breaking changes
+1. The minimum required PHP version is 8.0
+2. Removed deprecated method BaseModel::insert, use BaseModel::insertBulk instead
+3. Method BaseModel::prepareAndInsert is marked as deprecated, use BaseModel::prepareAndInsertBulk instead
+
 ## 1.19.0 [2023-09-28]
 
 ### Features

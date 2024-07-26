@@ -9,13 +9,13 @@ Adapter to Laravel and Lumen of the most popular libraries:
 
 ## Features
 
-No dependency, only Curl (support php >=7.1 )
+No dependency, only Curl (support php >=8.0 )
 
 More: https://github.com/smi2/phpClickHouse#features
 
 ## Prerequisites
 
-- PHP 7.1, 8.0
+- PHP 8.0
 - Laravel/Lumen 7+
 - Clickhouse server
 
@@ -87,7 +87,6 @@ More about `$db` see here: https://github.com/smi2/phpClickHouse/blob/master/REA
 ```php
 <?php
 
-
 namespace App\Models\Clickhouse;
 
 use PhpClickHouseLaravel\BaseModel;
@@ -104,7 +103,6 @@ class MyTable extends BaseModel
 
 ```php
 <?php
-
 
 class CreateMyTable extends \PhpClickHouseLaravel\Migration
 {
@@ -354,7 +352,6 @@ MyTable::insertAssoc([[1, 'str', new InsertArray(['a','b'])]]);
 ```php
 <?php
 
-
 namespace App\Models\Clickhouse;
 
 use PhpClickHouseLaravel\BaseModel;
@@ -385,4 +382,86 @@ return new class extends \PhpClickHouseLaravel\Migration
         static::write('DROP TABLE my_table2');
     }
 };
+```
+
+### Cluster mode
+
+**Important!**
+* Each ClickHouse node must have one database name and login and password.
+* For reading and writing, the connection is made to the first available node.
+* Migrations executes on all nodes. If one of the nodes is unavailable, the migration will throw an exception.
+
+Your config/database.php should look like:
+```php
+'clickhouse' => [
+    'driver' => 'clickhouse',
+    'cluster' => [
+        [
+            'host' => 'clickhouse01',
+            'port' => '8123',
+        ],
+        [
+            'host' => 'clickhouse02',
+            'port' => '8123',
+        ],
+    ],
+    'database' => env('CLICKHOUSE_DATABASE','default'),
+    'username' => env('CLICKHOUSE_USERNAME','default'),
+    'password' => env('CLICKHOUSE_PASSWORD',''),
+    'timeout_connect' => env('CLICKHOUSE_TIMEOUT_CONNECT',2),
+    'timeout_query' => env('CLICKHOUSE_TIMEOUT_QUERY',2),
+    'https' => (bool)env('CLICKHOUSE_HTTPS', null),
+    'retries' => env('CLICKHOUSE_RETRIES', 0),
+    'settings' => [ // optional
+        'max_partitions_per_insert_block' => 300,
+    ],
+],
+```
+
+Migration is:
+
+```php
+<?php
+
+return new class extends \PhpClickHouseLaravel\Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        static::write('
+            CREATE TABLE my_table (
+                id UInt32,
+                created_at DateTime,
+                field_one String,
+                field_two Int32
+            )
+            ENGINE = ReplicatedMergeTree('/clickhouse/tables/default.my_table', '{replica}')
+            ORDER BY (id)
+        ');
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        static::write('DROP TABLE my_table');
+    }
+};
+```
+
+You can get the host of the current node and switch the active connection to the next node:
+```php
+$row = new MyTable();
+echo $row->getThisClient()->getConnectHost();
+// will print 'clickhouse01'
+$row->resolveConnection()->getCluster()->slideNode();
+echo $row->getThisClient()->getConnectHost();
+// will print 'clickhouse02'
 ```
