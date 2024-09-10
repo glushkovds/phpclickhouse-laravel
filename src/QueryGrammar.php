@@ -17,12 +17,6 @@ class QueryGrammar extends Grammar
         return $this->isExpression($value) ? $this->getValue($value) : self::PARAMETER_SIGN;
     }
 
-    /** @inheritDoc */
-    public function compileWheres(Builder $query)
-    {
-        return static::prepareParameters(parent::compileWheres($query));
-    }
-
     /**
      * Second part of trick to change signs "?" to ":0", ":1" and so on
      * @param string $sql
