@@ -49,6 +49,7 @@ return [
             'settings' => [
                 'max_partitions_per_insert_block' => 300,
             ],
+            'fix_default_query_builder' => true,
         ],
 
         'clickhouse2' => [

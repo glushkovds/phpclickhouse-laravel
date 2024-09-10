@@ -11,7 +11,6 @@ class BaseTest extends TestCase
 {
     public function testWorkWithClient()
     {
-        Artisan::call('migrate');
         /** @var \ClickHouseDB\Client $db */
         $db = DB::connection('clickhouse')->getClient();
         $db->write("TRUNCATE TABLE examples");
