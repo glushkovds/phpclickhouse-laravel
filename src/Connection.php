@@ -77,6 +77,7 @@ class Connection extends BaseConnection
     /** @inheritDoc */
     public function statement($query, $bindings = []): bool
     {
+        $query = QueryGrammar::prepareParameters($query);
         return $this->run($query, $bindings, function ($query, $bindings) {
             return !$this->cluster->getActiveNode()->write($query, $bindings)->isError();
         });
@@ -85,6 +86,7 @@ class Connection extends BaseConnection
     /** @inheritDoc */
     public function affectingStatement($query, $bindings = []): int
     {
+        $query = QueryGrammar::prepareParameters($query);
         return (int)$this->statement($query, $bindings);
     }
 

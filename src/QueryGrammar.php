@@ -9,30 +9,7 @@ use Illuminate\Database\Query\Grammars\Grammar;
 
 class QueryGrammar extends Grammar
 {
-    const PARAMETER_SIGN = '#@?';
-
-    /** @inheritDoc */
-    public function parameterize(array $values): string
-    {
-        $params = [];
-        for ($i = 0; $i < count($values); $i++) {
-            $params[] = ":$i";
-        }
-
-        return implode(', ', $params);
-    }
-
-    /** @inheritDoc */
-    public function parameter($value)
-    {
-        return $this->isExpression($value) ? $this->getValue($value) : self::PARAMETER_SIGN;
-    }
-
-    /** @inheritDoc */
-    public function compileWheres(Builder $query)
-    {
-        return static::prepareParameters(parent::compileWheres($query));
-    }
+    const PARAMETER_SIGN = '?';
 
     /**
      * Second part of trick to change signs "?" to ":0", ":1" and so on

@@ -23,7 +23,7 @@ class BindingsTest extends TestCase
     public function testBindingsByTableMethod()
     {
         $query = DB::table('examples')
-            ->where(function (Builder $q) {
+            ->where(function ($q) {
                 $q->where('f_int', 1)
                     ->orWhere('f_int', 2)
                     ->orWhere('f_int', 3);
