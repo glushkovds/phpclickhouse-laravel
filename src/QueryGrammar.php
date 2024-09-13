@@ -36,6 +36,6 @@ class QueryGrammar extends Grammar
     /** @inheritDoc */
     protected function compileDeleteWithoutJoins(Builder $query, $table, $where): string
     {
-        return "alter table {$table} delete {$where}";
+        return "alter table $table delete $where";
     }
 }
