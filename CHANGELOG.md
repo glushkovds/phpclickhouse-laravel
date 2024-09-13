@@ -1,3 +1,8 @@
+## 2.1.0 [2024-09-10]
+
+### Bug fixes
+1. Parameter numbering with whereIn
+
 ## 2.0.0 [2024-07-26]
 
 ### Features

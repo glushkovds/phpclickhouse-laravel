@@ -44,6 +44,7 @@ $ composer require glushkovds/phpclickhouse-laravel
     'settings' => [ // optional
         'max_partitions_per_insert_block' => 300,
     ],
+    'fix_default_query_builder' => true,
 ],
 ```
 
@@ -170,6 +171,10 @@ $rows = MyTable::select(['field_one', new RawColumn('sum(field_two)', 'field_two
     ->settings(['max_threads' => 3])
     ->getRows();
 ```
+
+## Known issues
+
+[Some of the problems are described here](/docs/known_issues.md).
 
 ## Advanced usage
 
@@ -344,6 +349,7 @@ MyTable::insertAssoc([[1, 'str', new InsertArray(['a','b'])]]);
     'timeout_query' => 2,
     'https' => false,
     'retries' => 0,
+    'fix_default_query_builder' => true,
 ],
 ```
 
@@ -415,6 +421,7 @@ Your config/database.php should look like:
     'settings' => [ // optional
         'max_partitions_per_insert_block' => 300,
     ],
+    'fix_default_query_builder' => true,
 ],
 ```
 

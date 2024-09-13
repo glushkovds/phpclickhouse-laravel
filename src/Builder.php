@@ -13,6 +13,7 @@ class Builder extends BaseBuilder
 {
 
     use WithClient;
+    use BuilderMethodsFromLaravel;
 
     /** @var string */
     protected $tableSources;

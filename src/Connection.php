@@ -101,4 +101,17 @@ class Connection extends BaseConnection
 
         return $result;
     }
+
+    /**
+     * Get a new query builder instance.
+     *
+     * @return Builder|\Illuminate\Database\Query\Builder
+     */
+    public function query()
+    {
+        if ($this->config['fix_default_query_builder'] ?? false) {
+            return new Builder();
+        }
+        return parent::query();
+    }
 }
