@@ -44,9 +44,9 @@ class BaseTest extends TestCase
         $result = Example::select()->paginate(2);
         $this->assertTrue($result instanceof LengthAwarePaginator);
         $this->assertEquals(3, $result->total());
-        $this->assertEquals(2, $result->items()->count());
-        $this->assertEquals(1, $result->items()->first()['f_int']);
-        $this->assertEquals('zz', $result->items()->first()['f_string']);
+        $this->assertCount(2, $result->items());
+        $this->assertEquals(1, $result->items()[0]['f_int']);
+        $this->assertEquals('zz', $result->items()[0]['f_string']);
     }
 
     public function testSimpleModelInsertAndSimplePaginate()
@@ -57,12 +57,12 @@ class BaseTest extends TestCase
             ['f_int' => 2, 'f_string' => 'aa'],
             ['f_int' => 3, 'f_string' => 'bb'],
         ]);
-        $result = Example::select()->paginate(2);
+        $result = Example::select()->simplePaginate(2);
         $this->assertTrue($result instanceof Paginator);
-        $this->assertEquals(2, $result->items()->count());
+        $this->assertCount(2, $result->items());
         $this->assertEquals(2, $result->perPage());
-        $this->assertEquals(1, $result->items()->first()['f_int']);
-        $this->assertEquals('zz', $result->items()->first()['f_string']);
+        $this->assertEquals(1, $result->items()[0]['f_int']);
+        $this->assertEquals('zz', $result->items()[0]['f_string']);
     }
 
     public function testMultipleWheres()
