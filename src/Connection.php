@@ -46,7 +46,7 @@ class Connection extends BaseConnection
     /** @inheritDoc */
     protected function getDefaultQueryGrammar()
     {
-        return new QueryGrammar();
+        return new QueryGrammar($this);
     }
 
     /** @inheritDoc */
