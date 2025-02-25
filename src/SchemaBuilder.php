@@ -12,7 +12,7 @@ class SchemaBuilder extends BaseBuilder
     public function hasTable($table): bool
     {
         return count($this->connection->select(
-                $this->grammar->compileTableExists(), [$this->connection->getDatabaseName(), $table]
+                $this->grammar->compileTableExists($this->connection->getDatabaseName(), $table)
             )) > 0;
     }
 }

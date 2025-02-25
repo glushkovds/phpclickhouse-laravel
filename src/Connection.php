@@ -52,7 +52,7 @@ class Connection extends BaseConnection
     /** @inheritDoc */
     protected function getDefaultSchemaGrammar()
     {
-        return new SchemaGrammar();
+        return new SchemaGrammar($this);
     }
 
     /** @inheritDoc */
