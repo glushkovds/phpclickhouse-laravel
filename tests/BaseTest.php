@@ -2,6 +2,8 @@
 
 namespace Tests;
 
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use PhpClickHouseLaravel\Builder;
@@ -29,6 +31,38 @@ class BaseTest extends TestCase
         $rows = Example::select()->getRows();
         $this->assertEquals(1, $rows[0]['f_int']);
         $this->assertEquals('zz', $rows[0]['f_string']);
+    }
+
+    public function testSimpleModelInsertAndPaginate()
+    {
+        Example::truncate();
+        Example::insertAssoc([
+            ['f_int' => 1, 'f_string' => 'zz'],
+            ['f_int' => 2, 'f_string' => 'aa'],
+            ['f_int' => 3, 'f_string' => 'bb'],
+        ]);
+        $result = Example::select()->paginate(2);
+        $this->assertTrue($result instanceof LengthAwarePaginator);
+        $this->assertEquals(3, $result->total());
+        $this->assertCount(2, $result->items());
+        $this->assertEquals(1, $result->items()[0]['f_int']);
+        $this->assertEquals('zz', $result->items()[0]['f_string']);
+    }
+
+    public function testSimpleModelInsertAndSimplePaginate()
+    {
+        Example::truncate();
+        Example::insertAssoc([
+            ['f_int' => 1, 'f_string' => 'zz'],
+            ['f_int' => 2, 'f_string' => 'aa'],
+            ['f_int' => 3, 'f_string' => 'bb'],
+        ]);
+        $result = Example::select()->simplePaginate(2);
+        $this->assertTrue($result instanceof Paginator);
+        $this->assertCount(2, $result->items());
+        $this->assertEquals(2, $result->perPage());
+        $this->assertEquals(1, $result->items()[0]['f_int']);
+        $this->assertEquals('zz', $result->items()[0]['f_string']);
     }
 
     public function testMultipleWheres()
