@@ -11,13 +11,16 @@ use Illuminate\Support\Fluent;
 class SchemaGrammar extends Grammar
 {
     /**
-     * Compile the query to determine the list of tables.
+     * Compile the query to determine if the given table exists.
      *
+     * @param string|null $schema
+     * @param string $table
      * @return string
      */
-    public function compileTableExists(): string
+    public function compileTableExists($schema, $table): string
     {
-        return "select * from system.tables where database = :0 and name = :1";
+        return "select * from system.tables where database = " . $this->quoteString($schema)
+            . " and name = " . $this->quoteString($table);
     }
 
     /**
@@ -25,10 +28,9 @@ class SchemaGrammar extends Grammar
      *
      * @param Blueprint $blueprint
      * @param Fluent $command
-     * @param Connection $connection
-     * @return array
+     * @return string
      */
-    public function compileCreate(Blueprint $blueprint, Fluent $command, Connection $connection): array
+    public function compileCreate(Blueprint $blueprint, Fluent $command)
     {
         $sql = "CREATE TABLE :table (
                 :columns
@@ -43,7 +45,7 @@ class SchemaGrammar extends Grammar
         ];
         $sql = str_replace(array_keys($bindings), array_values($bindings), $sql);
 
-        return [$sql];
+        return $sql;
     }
 
     /**
