@@ -1,3 +1,9 @@
+## 2.2.0 [2025-02-27]
+
+### Features
+1. Added support for Laravel 12 (#36)
+2. Added count, paginate and simplePaginate (#37)
+
 ## 2.1.0 [2024-09-10]
 
 ### Bug fixes
