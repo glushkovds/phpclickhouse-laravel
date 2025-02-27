@@ -133,6 +133,14 @@ class Builder extends BaseBuilder
         return new static($this->client);
     }
 
+    public function count(): int
+    {
+        $builder = $this->getCountQuery();
+        $result = $builder->getRows();
+
+        return (int) $result[0]['count'] ?? 0;
+    }
+
     /**
      * Paginate the given query.
      *
@@ -152,7 +160,7 @@ class Builder extends BaseBuilder
         $count = (clone $this)->count();
 
         $perPage = ($perPage instanceof Closure
-            ? $perPage($total)
+            ? $perPage($count)
             : $perPage
         ) ?: 15;
 
@@ -189,10 +197,11 @@ class Builder extends BaseBuilder
         // Next we will set the limit and offset for this query so that when we get the
         // results we get the proper section of results. Then, we'll create the full
         // paginator instances for these results with the given page and per page.
-        $this->offset(($page - 1) * $perPage)->limit($perPage + 1);
+        $results = $this->limit($perPage + 1, ($page - 1) * $perPage)
+            ->getRows();
 
         return new Paginator(
-            $this->getRows(),
+            $results,
             $perPage,
             $page,
             [
