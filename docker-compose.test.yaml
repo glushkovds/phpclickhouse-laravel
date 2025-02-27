@@ -10,7 +10,7 @@ services:
       - ./:/src
 
   clickhouse01:
-    image: yandex/clickhouse-server
+    image: clickhouse/clickhouse-server:24.8
     ports:
       - "18123:8123"
     depends_on:
@@ -19,7 +19,7 @@ services:
       - ./tests/docker/clickhouse01:/etc/clickhouse-server
 
   clickhouse02:
-    image: yandex/clickhouse-server
+    image: clickhouse/clickhouse-server:24.8
     ports:
       - "18124:8123"
     depends_on:
