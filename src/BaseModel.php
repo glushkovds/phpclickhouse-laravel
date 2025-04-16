@@ -149,7 +149,10 @@ class BaseModel
     public static function create(array $attributes = [])
     {
         $model = static::make($attributes);
-        $model->fireModelEvent('creating', false);
+
+        if ($model->fireModelEvent('creating', false) === false) {
+            return false;
+        }
 
         if ($model->save()) {
             $model->wasRecentlyCreated = true;
