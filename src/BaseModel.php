@@ -150,7 +150,7 @@ class BaseModel
     {
         $model = static::make($attributes);
 
-        if ($model->fireModelEvent('creating', false) === false) {
+        if ($model->fireModelEvent('creating') === false) {
             return false;
         }
 
