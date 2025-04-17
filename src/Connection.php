@@ -93,6 +93,10 @@ class Connection extends BaseConnection
     /** @inheritDoc */
     protected function run($query, $bindings, Closure $callback)
     {
+        foreach ($this->beforeExecutingCallbacks as $beforeExecutingCallback) {
+            $beforeExecutingCallback($query, $bindings, $this);
+        }
+
         $start = microtime(true);
 
         $result = $callback($query, $bindings);
