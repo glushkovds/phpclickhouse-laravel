@@ -77,6 +77,7 @@ return [
                     'port' => '8123',
                 ],
             ],
+            'cluster_name' => 'company_cluster',
             'database' => 'default',
             'username' => 'default',
             'password' => '',

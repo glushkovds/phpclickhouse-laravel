@@ -21,7 +21,8 @@
     "smi2/phpclickhouse": "^1.4.2",
     "the-tinderbox/clickhouse-builder": "^6.0",
     "illuminate/support": ">=7",
-    "illuminate/database": ">=7"
+    "illuminate/database": ">=7",
+    "glushkovds/php-clickhouse-schema-builder": "^1.0"
   },
   "require-dev": {
     "laravel/framework": ">=9",

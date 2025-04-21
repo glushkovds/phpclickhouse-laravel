@@ -1,3 +1,8 @@
+## 2.3.0 [2025-04-21]
+
+### Features
+1. Added Schema Builder
+
 ## 2.2.0 [2025-02-27]
 
 ### Features

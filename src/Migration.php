@@ -7,6 +7,7 @@ namespace PhpClickHouseLaravel;
 use ClickHouseDB\Statement;
 use ClickHouseDB\Transport\CurlerRequest;
 use Illuminate\Database\Migrations\Migration as BaseMigration;
+use PhpClickHouseSchemaBuilder\Tables\MergeTree;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 class Migration extends BaseMigration
@@ -34,5 +35,16 @@ class Migration extends BaseMigration
             }
         }
         return $instance->resolveConnection()->getCluster()->write($sql, $bindings);
+    }
+
+    protected static function createMergeTree(string $tableName, callable $callback): Statement
+    {
+        $instance = new static();
+        $config = config("database.connections.$instance->connection");
+        $table = (new MergeTree($tableName))
+            ->dbName($config['database'])
+            ->onCluster($config['cluster_name'] ?? null);
+        $callback($table);
+        return static::write($table->compile());
     }
 }

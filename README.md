@@ -138,6 +138,43 @@ class CreateMyTable extends \PhpClickHouseLaravel\Migration
 }
 ```
 
+Or you can also use the Schema Builder
+
+```php
+<?php
+
+class CreateMyTable extends \PhpClickHouseLaravel\Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        static::createMergeTree('my_table', fn(MergeTree $table) => $table
+            ->columns([
+                $table->uInt32('id'),
+                $table->datetime('created_at', 3)->default(new Expression('now64()')),
+                $table->string('field_one'),
+                $table->int32('field_two'),
+            ])
+            ->orderBy('id')
+        );
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        static::write('DROP TABLE my_table');
+    }
+}
+```
+
 **3.** And then you can insert data
 
 One row
