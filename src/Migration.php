@@ -44,6 +44,9 @@ class Migration extends BaseMigration
         $table = (new MergeTree($tableName))
             ->dbName($config['database'])
             ->onCluster($config['cluster_name'] ?? null);
+        if ($config['cluster'] ?? null) {
+            $table->getEngine()->replicated();
+        }
         $callback($table);
         return static::write($table->compile());
     }
