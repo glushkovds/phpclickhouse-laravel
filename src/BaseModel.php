@@ -7,9 +7,8 @@ namespace PhpClickHouseLaravel;
 use ClickHouseDB\Client;
 use ClickHouseDB\Statement;
 use Exception;
-use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Concerns\HasAttributes;
-use Illuminate\Database\Eloquent\Concerns\HasEvents;
+use PhpClickHouseLaravel\Concerns\HasEvents;
 use Illuminate\Database\Eloquent\Concerns\HidesAttributes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -58,13 +57,6 @@ class BaseModel
      * @var bool
      */
     public $wasRecentlyCreated = false;
-
-    /**
-     * The event dispatcher instance.
-     *
-     * @var Dispatcher
-     */
-    protected static $dispatcher;
 
     /**
      * The name of the database connection to use.
