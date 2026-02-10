@@ -55,11 +55,29 @@ class Builder extends BaseBuilder
     }
 
     /**
+     * Get the elapsed time in milliseconds since a given starting point.
+     *
+     * @param float $start
+     * @return float
+     */
+    protected function getElapsedTime($start)
+    {
+        return round((microtime(true) - $start) * 1000, 2);
+    }
+
+    /**
      * @return Statement
      */
     public function get(array $bindings = []): Statement
     {
-        return $this->client->select($this->toSql(), $bindings);
+        $query = $this->toSql();
+        $start = microtime(true);
+
+        $statement = $this->client->select($query, $bindings);
+
+        $this->resolveConnection()->logQuery($query, $bindings, $this->getElapsedTime($start));
+
+        return $statement;
     }
 
     /**
