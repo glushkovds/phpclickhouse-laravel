@@ -1,3 +1,9 @@
+## 2.5.0 [2026-02-10]
+
+### Features
+1. Replaced the Eloquent HasEvents trait with a minimal custom implementation
+2. Added query logging to the Builder class
+
 ## 2.3.0 [2025-04-21]
 
 ### Features
