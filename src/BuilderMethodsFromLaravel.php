@@ -220,7 +220,7 @@ trait BuilderMethodsFromLaravel
      */
     public function aggregate($function, $columns = ['*'])
     {
-        $results = $this->cloneWithout($this->unions || $this->havings ? [] : ['columns'])
+        $results = $this->cloneWithout($this->unions || $this->havings ? [] : ['columns' => []])
             ->setAggregate($function, $columns)
             ->getRows();
 
