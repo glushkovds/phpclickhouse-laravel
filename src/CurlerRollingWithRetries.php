@@ -15,7 +15,7 @@ class CurlerRollingWithRetries extends CurlerRolling
     protected $retries = 0;
 
     /** @inheritDoc */
-    public function execOne(CurlerRequest $request, $auto_close = false)
+    public function execOne(CurlerRequest $request, bool $auto_close = false): int
     {
         $attempts = 1 + max(0, $this->retries);
         $httpCode = 0;

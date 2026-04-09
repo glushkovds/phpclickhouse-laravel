@@ -1,4 +1,6 @@
-![Tests](https://github.com/glushkovds/phpclickhouse-laravel/actions/workflows/test.yml/badge.svg)
+![Tests](https://github.com/oralunal/phpclickhouse-laravel/actions/workflows/test.yml/badge.svg)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/oralunal/phpclickhouse-laravel.svg?style=flat-square)](https://packagist.org/packages/oralunal/phpclickhouse-laravel)
+[![Total Downloads](https://img.shields.io/packagist/dt/oralunal/phpclickhouse-laravel.svg?style=flat-square)](https://packagist.org/packages/oralunal/phpclickhouse-laravel)
 
 # phpClickHouse-laravel
 

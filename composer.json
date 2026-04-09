@@ -1,12 +1,12 @@
 {
-  "name": "glushkovds/phpclickhouse-laravel",
+  "name": "oralunal/phpclickhouse-laravel",
   "description": "Adapter of the most popular library https://github.com/smi2/phpClickHouse to Laravel",
   "keywords": [
     "php",
     "laravel",
     "clickhouse"
   ],
-  "homepage": "https://github.com/glushkovds/phpClickHouse-laravel",
+  "homepage": "https://github.com/oralunal/phpclickhouse-laravel",
   "type": "library",
   "license": "MIT",
   "authors": [
@@ -14,19 +14,19 @@
       "name": "Denis Glushkov",
       "email": "amkarovec@gmail.com",
       "homepage": "https://github.com/glushkovds"
+    },
+    {
+      "name": "Oral Unal",
+      "email": "oralunal@gmail.com",
+      "homepage": "https://github.com/oralunal"
     }
   ],
   "require": {
-    "php": ">=8.0",
-    "smi2/phpclickhouse": "^1.4.2",
-    "glushkovds/clickhouse-builder": "^6.1.2",
-    "illuminate/support": ">=7",
-    "illuminate/database": ">=7",
-    "glushkovds/php-clickhouse-schema-builder": "^1.0.2"
-  },
-  "require-dev": {
-    "laravel/framework": ">=9",
-    "phpunit/phpunit": "^9"
+    "php": "^8.5",
+    "smi2/phpclickhouse": "^1.26",
+    "oralunal/clickhouse-builder": "^1",
+    "laravel/framework": "^13",
+    "glushkovds/php-clickhouse-schema-builder": "^1.1"
   },
   "suggest": {
   },
