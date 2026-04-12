@@ -26,7 +26,7 @@ More: https://github.com/smi2/phpClickHouse#features
 **1.**  Install via composer
 
 ```sh
-$ composer require glushkovds/phpclickhouse-laravel
+$ composer require oralunal/phpclickhouse-laravel
 ```
 
 **2.** Add new connection into your config/database.php:
