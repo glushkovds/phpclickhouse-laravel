@@ -2,16 +2,29 @@
 
 namespace Tests;
 
+use Illuminate\Support\Facades\Artisan;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use PhpClickHouseLaravel\ClickhouseServiceProvider;
 
 abstract class TestCase extends OrchestraTestCase
 {
+    private static bool $migrated = false;
+
     protected function getPackageProviders($app): array
     {
         return [
             ClickhouseServiceProvider::class,
         ];
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        if (! self::$migrated) {
+            Artisan::call('migrate', ['--path' => 'tests/migrations', '--realpath' => false]);
+            self::$migrated = true;
+        }
     }
 
     protected function defineEnvironment($app): void

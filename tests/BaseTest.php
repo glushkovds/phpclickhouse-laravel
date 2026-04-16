@@ -17,8 +17,7 @@ class BaseTest extends TestCase
         $db = DB::connection('clickhouse')->getClient();
         $db->write("TRUNCATE TABLE examples");
         $db->insert('examples', [[100, 'string']], ['f_int', 'f_string']);
-        $db->write("ALTER TABLE examples UPDATE f_string='updated string' WHERE f_int=100");
-        usleep(1e4);
+        $db->write("ALTER TABLE examples UPDATE f_string='updated string' WHERE f_int=100 SETTINGS mutations_sync=2");
         $rows = $db->select("SELECT * FROM examples LIMIT 1")->rows();
         $this->assertEquals(100, $rows[0]['f_int']);
         $this->assertEquals('updated string', $rows[0]['f_string']);
