@@ -1,0 +1,49 @@
+name: tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.5']
+        laravel: ['^13.0']
+        clickhouse: ['24.8']
+
+    services:
+      clickhouse01:
+        image: clickhouse/clickhouse-server:${{ matrix.clickhouse }}
+        ports: ['18123:8123']
+      clickhouse02:
+        image: clickhouse/clickhouse-server:${{ matrix.clickhouse }}
+        ports: ['18124:8123']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Install dependencies
+        run: |
+          composer require "laravel/framework:${{ matrix.laravel }}" --no-update --no-interaction
+          composer update --prefer-dist --no-interaction
+
+      - name: Wait for ClickHouse
+        run: |
+          for i in {1..30}; do
+            if curl -sf 'http://127.0.0.1:18123/?query=SELECT%201' > /dev/null; then
+              echo "clickhouse01 ready"; break
+            fi
+            sleep 2
+          done
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit

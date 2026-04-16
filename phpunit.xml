@@ -27,5 +27,6 @@
         <env name="CLICKHOUSE_DATABASE" value="default"/>
         <env name="CLICKHOUSE_USERNAME" value="default"/>
         <env name="CLICKHOUSE_PASSWORD" value=""/>
+        <env name="CLICKHOUSE_CLUSTER_AVAILABLE" value="1"/>
     </php>
 </phpunit>

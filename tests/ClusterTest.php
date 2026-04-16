@@ -16,6 +16,10 @@ class ClusterTest extends TestCase
 
     public function testRegularCluster()
     {
+        if (! env('CLICKHOUSE_CLUSTER_AVAILABLE')) {
+            $this->markTestSkipped('company_cluster config requires docker-compose services');
+        }
+
         $node1Port = (int) env('CLICKHOUSE_PORT', 18123);
         $node2Port = (int) env('CLICKHOUSE2_PORT', 18124);
 
@@ -37,6 +41,10 @@ class ClusterTest extends TestCase
 
     public function testProblemCluster()
     {
+        if (! env('CLICKHOUSE_CLUSTER_AVAILABLE')) {
+            $this->markTestSkipped('company_cluster config requires docker-compose services');
+        }
+
         $node2Port = (int) env('CLICKHOUSE2_PORT', 18124);
 
         $this->assertEquals($node2Port, (int) (new Example4Problem())->getThisClient()->getConnectPort());
