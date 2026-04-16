@@ -2,3 +2,6 @@ vendor
 composer.lock
 .idea
 .phpunit.cache/
+workbench/.env
+workbench/bootstrap/cache/
+workbench/storage/
