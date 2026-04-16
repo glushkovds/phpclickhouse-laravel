@@ -78,5 +78,9 @@ abstract class TestCase extends OrchestraTestCase
             'https'          => false,
             'retries'        => 0,
         ]);
+
+        $app->afterResolving('migrator', function ($migrator) {
+            $migrator->path(__DIR__ . '/migrations');
+        });
     }
 }

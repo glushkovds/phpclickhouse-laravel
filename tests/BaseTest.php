@@ -77,16 +77,25 @@ class BaseTest extends TestCase
         $this->assertNotEmpty($rows);
     }
 
+    protected function tearDown(): void
+    {
+        foreach (glob(__DIR__ . '/migrations/example_*.php') as $f) {
+            @unlink($f);
+        }
+        parent::tearDown();
+    }
+
     public function testPretendMigration()
     {
         /** @var \ClickHouseDB\Client $db */
         $db = DB::connection('clickhouse')->getClient();
-        $migration = file_get_contents(base_path('database/migrations/2022_01_01_000000_example.php'));
+        $migrationsDir = __DIR__ . '/migrations';
+        $migration     = file_get_contents($migrationsDir . '/2022_01_01_000000_create_examples_table.php');
 
         // Default mode
         $tableName = 'examples_' . rand(0, 9999999999999999);
         $migrationTmp = str_replace('examples', $tableName, $migration);
-        file_put_contents(base_path('database/migrations/example_' . rand(0, 9999999999999999) . '.php'), $migrationTmp);
+        file_put_contents($migrationsDir . '/example_' . rand(0, 9999999999999999) . '.php', $migrationTmp);
         Artisan::call('migrate');
         $exist = $db->select("EXISTS $tableName")->fetchOne('result');
         $this->assertEquals(1, $exist);
@@ -94,7 +103,7 @@ class BaseTest extends TestCase
         // Pretend mode
         $tableName = 'examples_' . rand(0, 9999999999999999);
         $migrationTmp = str_replace('examples', $tableName, $migration);
-        file_put_contents(base_path('database/migrations/example_' . rand(0, 9999999999999999) . '.php'), $migrationTmp);
+        file_put_contents($migrationsDir . '/example_' . rand(0, 9999999999999999) . '.php', $migrationTmp);
         Artisan::call('migrate', ['--pretend' => true]);
         $exist = $db->select("EXISTS $tableName")->fetchOne('result');
         $this->assertEquals(0, $exist);
