@@ -1,14 +1,5 @@
 services:
 
-  php:
-    build: tests/docker
-    depends_on:
-      - clickhouse01
-      - clickhouse02
-      - zookeeper
-    volumes:
-      - ./:/src
-
   clickhouse01:
     image: clickhouse/clickhouse-server:24.8
     ports:
