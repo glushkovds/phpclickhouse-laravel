@@ -1,6 +1,0 @@
-language: php
-
-services:
-  - docker
-
-script: docker-compose -f docker-compose.test.yaml run php sh /src/tests.bootstrap.sh
