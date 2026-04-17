@@ -19,9 +19,19 @@ jobs:
       clickhouse01:
         image: clickhouse/clickhouse-server:${{ matrix.clickhouse }}
         ports: ['18123:8123']
+        env:
+          CLICKHOUSE_DB: default
+          CLICKHOUSE_USER: default
+          CLICKHOUSE_PASSWORD: ''
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: '1'
       clickhouse02:
         image: clickhouse/clickhouse-server:${{ matrix.clickhouse }}
         ports: ['18124:8123']
+        env:
+          CLICKHOUSE_DB: default
+          CLICKHOUSE_USER: default
+          CLICKHOUSE_PASSWORD: ''
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: '1'
 
     steps:
       - uses: actions/checkout@v4
