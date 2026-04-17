@@ -1,43 +1,78 @@
 {
-  "name": "oralunal/phpclickhouse-laravel",
-  "description": "Adapter of the most popular library https://github.com/smi2/phpClickHouse to Laravel",
-  "keywords": [
-    "php",
-    "laravel",
-    "clickhouse"
-  ],
-  "homepage": "https://github.com/oralunal/phpclickhouse-laravel",
-  "type": "library",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Denis Glushkov",
-      "email": "amkarovec@gmail.com",
-      "homepage": "https://github.com/glushkovds"
+    "name": "oralunal/phpclickhouse-laravel",
+    "description": "Adapter of the most popular library https://github.com/smi2/phpClickHouse to Laravel",
+    "keywords": [
+        "php",
+        "laravel",
+        "clickhouse"
+    ],
+    "homepage": "https://github.com/oralunal/phpclickhouse-laravel",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Denis Glushkov",
+            "email": "amkarovec@gmail.com",
+            "homepage": "https://github.com/glushkovds"
+        },
+        {
+            "name": "Oral Unal",
+            "email": "oralunal@gmail.com",
+            "homepage": "https://github.com/oralunal"
+        }
+    ],
+    "require": {
+        "php": "^8.5",
+        "smi2/phpclickhouse": "^1.26",
+        "oralunal/clickhouse-builder": "^1",
+        "laravel/framework": "^13",
+        "glushkovds/php-clickhouse-schema-builder": "^1.1"
     },
-    {
-      "name": "Oral Unal",
-      "email": "oralunal@gmail.com",
-      "homepage": "https://github.com/oralunal"
-    }
-  ],
-  "require": {
-    "php": "^8.5",
-    "smi2/phpclickhouse": "^1.26",
-    "oralunal/clickhouse-builder": "^1",
-    "laravel/framework": "^13",
-    "glushkovds/php-clickhouse-schema-builder": "^1.1"
-  },
-  "suggest": {
-  },
-  "autoload": {
-    "psr-4": {
-      "PhpClickHouseLaravel\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Tests\\": "tests/"
-    }
-  }
+    "require-dev": {
+        "orchestra/testbench": "^11.0",
+        "phpunit/phpunit": "^11.0",
+        "laravel/boost": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "PhpClickHouseLaravel\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "PhpClickHouseLaravel\\ClickhouseServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@php -r \"file_exists('vendor/bin/testbench') && passthru('vendor/bin/testbench package:discover --ansi');\""
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "test": "vendor/bin/phpunit",
+        "boost": "@php vendor/bin/testbench boost:install",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve --ansi"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "prefer-stable": true
 }

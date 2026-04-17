@@ -1,0 +1,39 @@
+laravel: '@testbench'
+
+providers:
+  - PhpClickHouseLaravel\ClickhouseServiceProvider
+  - Workbench\App\Providers\WorkbenchServiceProvider
+
+env:
+  DB_CONNECTION: clickhouse
+  CLICKHOUSE_HOST: 127.0.0.1
+  CLICKHOUSE_PORT: 18123
+
+migrations:
+  - workbench/database/migrations
+
+seeders:
+  - Workbench\Database\Seeders\DatabaseSeeder
+
+workbench:
+  start: '/'
+  install: true
+  health: false
+  discovers:
+    web: true
+    api: true
+    commands: true
+    components: false
+    factories: true
+    views: false
+  build:
+    - asset-publish
+    - create-sqlite-db
+    - db-wipe
+    - migrate-fresh
+  assets:
+    - laravel-assets
+  sync:
+    - from: storage
+      to: workbench/storage
+      reverse: true

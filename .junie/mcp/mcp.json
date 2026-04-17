@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "/Users/oralunal/Library/Application Support/Herd/bin/php85",
+            "args": [
+                "/Users/oralunal/Projects/phpclickhouse-laravel/vendor/orchestra/testbench-core/laravel/artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}

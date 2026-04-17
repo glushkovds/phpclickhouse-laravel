@@ -1,12 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          colors="true"
->
+         cacheDirectory=".phpunit.cache"
+         failOnRisky="true"
+         failOnWarning="true">
     <testsuites>
         <testsuite name="phpClickHouse-laravel test suite">
             <directory>tests</directory>
+            <exclude>tests/Models</exclude>
+            <exclude>tests/migrations</exclude>
         </testsuite>
     </testsuites>
+    <source>
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
+    <php>
+        <env name="APP_KEY" value="base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="/>
+        <env name="CLICKHOUSE_HOST" value="127.0.0.1"/>
+        <env name="CLICKHOUSE_PORT" value="18123"/>
+        <env name="CLICKHOUSE2_HOST" value="127.0.0.1"/>
+        <env name="CLICKHOUSE2_PORT" value="18124"/>
+        <env name="CLICKHOUSE_DATABASE" value="default"/>
+        <env name="CLICKHOUSE_USERNAME" value="default"/>
+        <env name="CLICKHOUSE_PASSWORD" value=""/>
+        <env name="CLICKHOUSE_CLUSTER_AVAILABLE" value="1"/>
+    </php>
 </phpunit>

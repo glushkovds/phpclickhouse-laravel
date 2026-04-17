@@ -1,47 +1,90 @@
-![Tests](https://github.com/oralunal/phpclickhouse-laravel/actions/workflows/test.yml/badge.svg)
+![Tests](https://github.com/oralunal/phpclickhouse-laravel/actions/workflows/tests.yml/badge.svg)
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/oralunal/phpclickhouse-laravel.svg?style=flat-square)](https://packagist.org/packages/oralunal/phpclickhouse-laravel)
 [![Total Downloads](https://img.shields.io/packagist/dt/oralunal/phpclickhouse-laravel.svg?style=flat-square)](https://packagist.org/packages/oralunal/phpclickhouse-laravel)
 
 # phpClickHouse-laravel
 
-Adapter to Laravel and Lumen of the most popular libraries:
+Laravel adapter for PHP ClickHouse tooling:
 
-- https://github.com/smi2/phpClickHouse - for connections and perform queries
-- https://github.com/the-tinderbox/ClickhouseBuilder - good query builder
+- https://github.com/smi2/phpClickHouse — HTTP transport and query execution
+- https://github.com/oralunal/clickhouse-builder — fluent query builder
+  (fork of `glushkovds/ClickhouseBuilder`, itself a fork of
+  `the-tinderbox/ClickhouseBuilder`)
 
 ## Features
 
-No dependency, only Curl (support php >=8.0 )
+- Eloquent-flavored `BaseModel` (`create`, `save`, `insertBulk`, `insertAssoc`, `where`, pagination)
+- `PhpClickHouseLaravel\Migration` base class for ClickHouse DDL migrations (single-node and cluster)
+- Query builder integration with `settings()`, `chunk()`, and ClickHouse-specific grammar
+- Column casts (currently `boolean`) applied on insert
+- Model events: `creating`, `created`, `saved`
+- Retry-on-network-error support (`retries` config key)
+- Buffer engine support via `$tableForInserts` / `$tableSources`
+- `OPTIMIZE`, `TRUNCATE`, `ALTER TABLE ... DELETE`, `ALTER TABLE ... UPDATE` helpers
+- Multi-instance and cluster-mode connections with active-node rotation
+- Publishable default config — `.env` is enough for most setups
 
+Underneath, smi2/phpClickHouse handles HTTP transport (curl-only, no PDO).
 More: https://github.com/smi2/phpClickHouse#features
 
 ## Prerequisites
 
-- PHP 8.0
-- Laravel/Lumen 7+
-- Clickhouse server
+- PHP 8.5+
+- Laravel 13+
+- ClickHouse server 24.x (older 20+ versions usually work but are no longer tested)
 
 ## Installation
 
-**1.**  Install via composer
+**1.** Install via composer:
 
 ```sh
-$ composer require oralunal/phpclickhouse-laravel
+composer require oralunal/phpclickhouse-laravel
 ```
 
-**2.** Add new connection into your config/database.php:
+The service provider is registered automatically via Laravel package
+auto-discovery. If you have auto-discovery disabled, add
+`PhpClickHouseLaravel\ClickhouseServiceProvider::class` to
+`bootstrap/providers.php` (Laravel 11+) or `config/app.php` (Laravel 10 and below).
+
+**2.** Configure the connection.
+
+The simplest setup — just set these in your `.env`:
+
+```dotenv
+CLICKHOUSE_HOST=localhost
+CLICKHOUSE_PORT=8123
+CLICKHOUSE_DATABASE=default
+CLICKHOUSE_USERNAME=default
+CLICKHOUSE_PASSWORD=
+# only if you use an https connection
+CLICKHOUSE_HTTPS=true
+```
+
+The service provider merges sensible defaults into
+`config('database.connections.clickhouse')` for you. No config edits needed
+for a single-node setup.
+
+If you want to customize defaults beyond what env vars cover, publish
+the config:
+
+```sh
+php artisan vendor:publish --tag=clickhouse-config
+```
+
+That drops a `config/clickhouse.php` into your app. Alternatively, you can
+define the connection yourself in `config/database.php`:
 
 ```php
 'clickhouse' => [
     'driver' => 'clickhouse',
     'host' => env('CLICKHOUSE_HOST'),
-    'port' => env('CLICKHOUSE_PORT','8123'),
-    'database' => env('CLICKHOUSE_DATABASE','default'),
-    'username' => env('CLICKHOUSE_USERNAME','default'),
-    'password' => env('CLICKHOUSE_PASSWORD',''),
-    'timeout_connect' => env('CLICKHOUSE_TIMEOUT_CONNECT',2),
-    'timeout_query' => env('CLICKHOUSE_TIMEOUT_QUERY',2),
-    'https' => (bool)env('CLICKHOUSE_HTTPS', null),
+    'port' => env('CLICKHOUSE_PORT', '8123'),
+    'database' => env('CLICKHOUSE_DATABASE', 'default'),
+    'username' => env('CLICKHOUSE_USERNAME', 'default'),
+    'password' => env('CLICKHOUSE_PASSWORD', ''),
+    'timeout_connect' => env('CLICKHOUSE_TIMEOUT_CONNECT', 2),
+    'timeout_query' => env('CLICKHOUSE_TIMEOUT_QUERY', 2),
+    'https' => (bool) env('CLICKHOUSE_HTTPS', null),
     'retries' => env('CLICKHOUSE_RETRIES', 0),
     'settings' => [ // optional
         'max_partitions_per_insert_block' => 300,
@@ -50,30 +93,9 @@ $ composer require oralunal/phpclickhouse-laravel
 ],
 ```
 
-Then patch your .env:
-
-```dotenv
-CLICKHOUSE_HOST=localhost
-CLICKHOUSE_PORT=8123
-CLICKHOUSE_DATABASE=default
-CLICKHOUSE_USERNAME=default
-CLICKHOUSE_PASSWORD=
-CLICKHOUSE_TIMEOUT_CONNECT=2
-CLICKHOUSE_TIMEOUT_QUERY=2
-# only if you use https connection
-CLICKHOUSE_HTTPS=true
-```
-
-**3.** Add service provider into your config/app.php (bootstrap/providers.php for Laravel 11+) file providers section:
-
-```php
-\PhpClickHouseLaravel\ClickhouseServiceProvider::class,
-```
-It should be placed *before* App\Providers\AppServiceProvider::class, and   App\Providers\EventServiceProvider::class.
-
 ## Usage
 
-You can use smi2/phpClickHouse functionality directly:
+You can use smi2/phpClickHouse directly:
 
 ```php
 /** @var \ClickHouseDB\Client $db */
@@ -81,11 +103,11 @@ $db = DB::connection('clickhouse')->getClient();
 $statement = $db->select('SELECT * FROM summing_url_views LIMIT 2');
 ```
 
-More about `$db` see here: https://github.com/smi2/phpClickHouse/blob/master/README.md
+More about `$db`: https://github.com/smi2/phpClickHouse/blob/master/README.md
 
-#### Or use dawnings of Eloquent ORM (will be implemented completely)
+#### Or use the Eloquent-like ORM
 
-**1.** Add model
+**1.** Add a model:
 
 ```php
 <?php
@@ -96,24 +118,18 @@ use PhpClickHouseLaravel\BaseModel;
 
 class MyTable extends BaseModel
 {
-    // Not necessary. Can be obtained from class name MyTable => my_table
+    // Optional. Derived from class name MyTable => my_table when omitted.
     protected $table = 'my_table';
-
 }
 ```
 
-**2.** Add migration
+**2.** Add a migration:
 
 ```php
 <?php
 
 class CreateMyTable extends \PhpClickHouseLaravel\Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         static::write('
@@ -128,11 +144,6 @@ class CreateMyTable extends \PhpClickHouseLaravel\Migration
         ');
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         static::write('DROP TABLE my_table');
@@ -140,18 +151,13 @@ class CreateMyTable extends \PhpClickHouseLaravel\Migration
 }
 ```
 
-Or you can also use the Schema Builder
+Or use the Schema Builder:
 
 ```php
 <?php
 
 class CreateMyTable extends \PhpClickHouseLaravel\Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         static::createMergeTree('my_table', fn(MergeTree $table) => $table
@@ -165,11 +171,6 @@ class CreateMyTable extends \PhpClickHouseLaravel\Migration
         );
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         static::write('DROP TABLE my_table');
@@ -177,9 +178,9 @@ class CreateMyTable extends \PhpClickHouseLaravel\Migration
 }
 ```
 
-**3.** And then you can insert data
+**3.** Insert data.
 
-One row
+One row:
 
 ```php
 $model = MyTable::create(['model_name' => 'model 1', 'some_param' => 1]);
@@ -192,16 +193,16 @@ $model = new MyTable();
 $model->fill(['model_name' => 'model 1', 'some_param' => 1])->save();
 ```
 
-Or bulk insert
+Bulk insert:
 
 ```php
-# Non assoc way
+# Non-assoc
 MyTable::insertBulk([['model 1', 1], ['model 2', 2]], ['model_name', 'some_param']);
-# Assoc way
+# Assoc
 MyTable::insertAssoc([['model_name' => 'model 1', 'some_param' => 1], ['some_param' => 2, 'model_name' => 'model 2']]);
 ```
 
-**4.** Now check out the query builder
+**4.** Query builder:
 
 ```php
 $rows = MyTable::select(['field_one', new RawColumn('sum(field_two)', 'field_two_sum')])
@@ -219,9 +220,8 @@ $rows = MyTable::select(['field_one', new RawColumn('sum(field_two)', 'field_two
 
 ### Columns casting
 
-Before insertion, the column will be converted to the required data type specified in the field `$casts`.  
-This feature does not apply to data selection.  
-The supported cast types are: `boolean`.
+Before insertion, the column is converted to the data type specified in
+`$casts`. This only applies to inserts, not selects. Supported: `boolean`.
 
 ```php
 namespace App\Models\Clickhouse;
@@ -245,29 +245,28 @@ MyTable::insertAssoc([
 
 ### Events
 
-Events work just like an [eloquent model events](https://laravel.com/docs/9.x/eloquent#events)  
-Available events: **creating**, **created**, **saved**
+Events work like [Eloquent model events](https://laravel.com/docs/eloquent#events).
+Available: **creating**, **created**, **saved**.
 
 ### Retries
 
-You may enable ability to retry requests while received not 200 response, maybe due network connectivity problems.
+You can retry requests on non-200 responses (e.g., transient network errors).
 
-Patch your .env:
+In `.env`:
 
 ```dotenv
 CLICKHOUSE_RETRIES=2
 ```
 
-retries is optional, default value is 0.  
-0 mean only one attempt.  
-1 mean one attempt + 1 retry while error (total 2 attempts).
+`retries` is optional; default is `0` (a single attempt, no retries). `1`
+means one attempt + one retry on error (two total).
 
 ### Working with huge rows
 
-You can chunk results like in Laravel
+Chunk results like in Laravel:
 
 ```php
-// Split the result into chunks of 30 rows 
+// Split the result into chunks of 30 rows
 $rows = MyTable::select(['field_one', 'field_two'])
     ->chunk(30, function ($rows) {
         foreach ($rows as $row) {
@@ -289,15 +288,14 @@ use PhpClickHouseLaravel\BaseModel;
 
 class MyTable extends BaseModel
 {
-    // Not necessary. Can be obtained from class name MyTable => my_table
+    // Optional; derived from class name when omitted.
     protected $table = 'my_table';
-    // All inserts will be in the table $tableForInserts 
-    // But all selects will be from $table
+    // All inserts go to $tableForInserts, selects read from $table.
     protected $tableForInserts = 'my_table_buffer';
 }
 ```
 
-If you also want to read from your buffer table, put its name in $table
+If you also want to read from the buffer table, set its name as `$table`:
 
 ```php
 <?php
@@ -314,7 +312,7 @@ class MyTable extends BaseModel
 
 ### OPTIMIZE Statement
 
-See https://clickhouse.com/docs/ru/sql-reference/statements/optimize/
+See https://clickhouse.com/docs/en/sql-reference/statements/optimize/
 
 ```php
 MyTable::optimize($final = false, $partition = null);
@@ -322,7 +320,7 @@ MyTable::optimize($final = false, $partition = null);
 
 ### TRUNCATE Statement
 
-Removes all data from a table.
+Remove all data from a table:
 
 ```php
 MyTable::truncate();
@@ -336,7 +334,7 @@ See https://clickhouse.com/docs/en/sql-reference/statements/alter/delete/
 MyTable::where('field_one', 123)->delete();
 ```
 
-Using buffer engine and performing OPTIMIZE or ALTER TABLE DELETE
+Using the buffer engine with OPTIMIZE / ALTER TABLE DELETE:
 
 ```php
 <?php
@@ -347,7 +345,7 @@ use PhpClickHouseLaravel\BaseModel;
 
 class MyTable extends BaseModel
 {
-    // All SELECT's and INSERT's on $table
+    // SELECT and INSERT on $table
     protected $table = 'my_table_buffer';
     // OPTIMIZE and DELETE on $tableSources
     protected $tableSources = 'my_table';
@@ -356,11 +354,11 @@ class MyTable extends BaseModel
 
 ### Updates
 
-See https://clickhouse.com/docs/ru/sql-reference/statements/alter/update/
+See https://clickhouse.com/docs/en/sql-reference/statements/alter/update/
 
 ```php
 MyTable::where('field_one', 123)->update(['field_two' => 'new_val']);
-// or expression
+// or an expression
 MyTable::where('field_one', 123)
     ->update(['field_two' => new RawColumn("concat(field_two,'new_val')")]);
 ```
@@ -372,27 +370,47 @@ MyTable::where('field_one', 123)
 MyTable::insertAssoc([[1, 'str', new InsertArray(['a','b'])]]);
 ```
 
-### Working with multiple Clickhouse instances in a project
+### Working with multiple ClickHouse instances in a project
 
-**1.** Add second connection into your config/database.php:
+`config/clickhouse.php` is a map from connection name to connection
+config. The service provider merges every entry into
+`config('database.connections.<name>')`, so you can declare additional
+ClickHouse connections alongside the default one in a single file.
 
-```php
-'clickhouse2' => [
-    'driver' => 'clickhouse',
-    'host' => 'clickhouse2',
-    'port' => '8123',
-    'database' => 'default',
-    'username' => 'default',
-    'password' => '',
-    'timeout_connect' => 2,
-    'timeout_query' => 2,
-    'https' => false,
-    'retries' => 0,
-    'fix_default_query_builder' => true,
-],
+**1.** Publish the config if you haven't already:
+
+```sh
+php artisan vendor:publish --tag=clickhouse-config
 ```
 
-**2.** Add model
+Then add a second connection in `config/clickhouse.php`:
+
+```php
+return [
+    'clickhouse' => [
+        // ... default connection
+    ],
+
+    'clickhouse2' => [
+        'driver' => 'clickhouse',
+        'host' => env('CLICKHOUSE2_HOST', '127.0.0.1'),
+        'port' => env('CLICKHOUSE2_PORT', '8123'),
+        'database' => 'default',
+        'username' => 'default',
+        'password' => '',
+        'timeout_connect' => 2,
+        'timeout_query' => 2,
+        'https' => false,
+        'retries' => 0,
+        'fix_default_query_builder' => true,
+    ],
+];
+```
+
+(Adding the same shape to `config/database.php`'s `connections` array
+still works — user-supplied values always win over the package defaults.)
+
+**2.** Add a model pointing at it:
 
 ```php
 <?php
@@ -404,11 +422,12 @@ use PhpClickHouseLaravel\BaseModel;
 class MyTable2 extends BaseModel
 {
     protected $connection = 'clickhouse2';
-    
+
     protected $table = 'my_table2';
 }
 ```
-**3.** Add migration
+
+**3.** Add a migration bound to that connection:
 
 ```php
 <?php
@@ -416,12 +435,12 @@ class MyTable2 extends BaseModel
 return new class extends \PhpClickHouseLaravel\Migration
 {
     protected $connection = 'clickhouse2';
-    
+
     public function up()
     {
         static::write('CREATE TABLE my_table2 ...');
     }
-    
+
     public function down()
     {
         static::write('DROP TABLE my_table2');
@@ -432,11 +451,24 @@ return new class extends \PhpClickHouseLaravel\Migration
 ### Cluster mode
 
 **Important!**
-* Each ClickHouse node must have one database name and login and password.
-* For reading and writing, the connection is made to the first available node.
-* Migrations executes on all nodes. If one of the nodes is unavailable, the migration will throw an exception.
+* Each ClickHouse node must share the same database name, username, and password.
+* Reads and writes go to the first reachable node.
+* Migrations execute on all nodes. If any node is unreachable, the migration throws.
+* `ReplicatedMergeTree` uses the `{replica}` and `{shard}` macros — those
+  must be defined on each ClickHouse server (in `config.xml` or
+  `config.d/*.xml`), **not** in this package. Example config:
+  ```xml
+  <macros>
+      <shard>01</shard>
+      <replica>clickhouse01</replica>
+  </macros>
+  ```
+  See `tests/docker/clickhouse01/config.xml` in this repo for a working
+  example, or the ClickHouse docs:
+  https://clickhouse.com/docs/en/operations/settings/settings#server_settings-macros
 
-Your config/database.php should look like:
+Your `config/database.php` should look like:
+
 ```php
 'clickhouse' => [
     'driver' => 'clickhouse',
@@ -450,12 +482,12 @@ Your config/database.php should look like:
             'port' => '8123',
         ],
     ],
-    'database' => env('CLICKHOUSE_DATABASE','default'),
-    'username' => env('CLICKHOUSE_USERNAME','default'),
-    'password' => env('CLICKHOUSE_PASSWORD',''),
-    'timeout_connect' => env('CLICKHOUSE_TIMEOUT_CONNECT',2),
-    'timeout_query' => env('CLICKHOUSE_TIMEOUT_QUERY',2),
-    'https' => (bool)env('CLICKHOUSE_HTTPS', null),
+    'database' => env('CLICKHOUSE_DATABASE', 'default'),
+    'username' => env('CLICKHOUSE_USERNAME', 'default'),
+    'password' => env('CLICKHOUSE_PASSWORD', ''),
+    'timeout_connect' => env('CLICKHOUSE_TIMEOUT_CONNECT', 2),
+    'timeout_query' => env('CLICKHOUSE_TIMEOUT_QUERY', 2),
+    'https' => (bool) env('CLICKHOUSE_HTTPS', null),
     'retries' => env('CLICKHOUSE_RETRIES', 0),
     'settings' => [ // optional
         'max_partitions_per_insert_block' => 300,
@@ -464,21 +496,16 @@ Your config/database.php should look like:
 ],
 ```
 
-Migration is:
+Migration:
 
 ```php
 <?php
 
 return new class extends \PhpClickHouseLaravel\Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
-        static::write('
+        static::write("
             CREATE TABLE my_table (
                 id UInt32,
                 created_at DateTime,
@@ -487,14 +514,9 @@ return new class extends \PhpClickHouseLaravel\Migration
             )
             ENGINE = ReplicatedMergeTree('/clickhouse/tables/default.my_table', '{replica}')
             ORDER BY (id)
-        ');
+        ");
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         static::write('DROP TABLE my_table');
@@ -502,7 +524,8 @@ return new class extends \PhpClickHouseLaravel\Migration
 };
 ```
 
-You can get the host of the current node and switch the active connection to the next node:
+You can read the current node and rotate to the next:
+
 ```php
 $row = new MyTable();
 echo $row->getThisClient()->getConnectHost();
@@ -511,3 +534,16 @@ $row->resolveConnection()->getCluster()->slideNode();
 echo $row->getThisClient()->getConnectHost();
 // will print 'clickhouse02'
 ```
+
+## Contributing
+
+The package is developed against **Orchestra Testbench** with a local
+ClickHouse in Docker. To run the test suite locally:
+
+1. `docker compose -f docker-compose.test.yaml up -d`
+2. `composer install`
+3. `composer test`
+
+See [docs/howto_run_local_test.md](docs/howto_run_local_test.md) for
+prerequisites, cluster-test notes, and using `vendor/bin/testbench` /
+Laravel Boost during development.

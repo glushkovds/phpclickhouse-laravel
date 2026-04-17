@@ -2,56 +2,57 @@
 
 The problem is described here: https://github.com/glushkovds/phpclickhouse-laravel/pull/34
 
-The reason for the problem is that for the `DB::table('my-table')` construction 
-the builder used was not from this library `\PhpClickHouseLaravel\Builder`, 
-but the standard `\Illuminate\Database\Query\Builder`.
+For `DB::table('my-table')` the default builder used to be
+`\Illuminate\Database\Query\Builder` instead of this library's
+`\PhpClickHouseLaravel\Builder`, which broke parameter numbering for
+`whereIn` / `whereBetween`.
 
-### To fix this problem
+### Status
 
-Add `'fix_default_query_builder' => true,` to connection config in `config/database.php` like this:
+`fix_default_query_builder` is now **enabled by default** in the
+shipped `config/clickhouse.php`, so most users do not need to do
+anything. The rest of this page is for users who define the
+connection manually in `config/database.php` and opted out.
+
+### Opting in manually
+
+If you maintain your own connection block in `config/database.php`,
+make sure it contains:
 
 ```php
 'clickhouse' => [
     'driver' => 'clickhouse',
-    'host' => env('CLICKHOUSE_HOST'),
-    'port' => env('CLICKHOUSE_PORT','8123'),
-    'database' => env('CLICKHOUSE_DATABASE','default'),
-    'username' => env('CLICKHOUSE_USERNAME','default'),
-    'password' => env('CLICKHOUSE_PASSWORD',''),
-    'timeout_connect' => env('CLICKHOUSE_TIMEOUT_CONNECT',2),
-    'timeout_query' => env('CLICKHOUSE_TIMEOUT_QUERY',2),
-    'https' => (bool)env('CLICKHOUSE_HTTPS', null),
-    'retries' => env('CLICKHOUSE_RETRIES', 0),
-    'settings' => [ // optional
-        'max_partitions_per_insert_block' => 300,
-    ],
+    // ... your other keys
     'fix_default_query_builder' => true,
 ],
 ```
 
 ### Breaking changes
 
-This fix will break your existing code if you use constructs like this:
+The fix changes the return type of `DB::table('my-table')->...->get()`
+from an Eloquent collection to a ClickHouse `Statement`. If you rely
+on the old behavior:
+
 ```php
 $rows = DB::table('my-table')
     ...
-    ->get(); // Collection
+    ->get(); // was Collection
 ```
-You need to change your code to:
+
+switch to:
+
 ```php
 $rows = DB::table('my-table')
     ...
-    ->get() // Statement
+    ->get()   // Statement
     ->rows(); // array
 ```
 
-### Why not use \Illuminate\Database\Query\Builder
+### Why not use `\Illuminate\Database\Query\Builder`
 
-Because this library use [the-tinderbox/ClickhouseBuilder](https://github.com/the-tinderbox/ClickhouseBuilder), 
-which offers its own builder.  
-It offers special methods for working with Clickhouse, which are not available in the standard builder.  
-And vice versa, the standard builder has methods that cannot be implemented for Clickhouse.
-
-### In the feature release v3
-In the feature release v3 this fix will be applied by default.
+This library uses [oralunal/clickhouse-builder](https://github.com/oralunal/clickhouse-builder)
+(a fork of `glushkovds/ClickhouseBuilder`, itself a fork of
+`the-tinderbox/ClickhouseBuilder`), which provides its own builder
+with ClickHouse-specific methods that the standard builder cannot
+represent, and vice versa.
 
