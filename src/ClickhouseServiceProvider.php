@@ -14,7 +14,18 @@ class ClickhouseServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/clickhouse.php', 'database.connections.clickhouse');
+        $defaults = require __DIR__ . '/../config/clickhouse.php';
+        $config = $this->app['config'];
+
+        foreach ($defaults as $name => $connectionDefaults) {
+            $existing = $config->get("database.connections.{$name}", []);
+            // User-supplied values win over our defaults; shallow merge
+            // mirrors mergeConfigFrom semantics.
+            $config->set(
+                "database.connections.{$name}",
+                array_merge($connectionDefaults, $existing)
+            );
+        }
     }
 
     /**
