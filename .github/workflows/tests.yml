@@ -38,12 +38,16 @@ jobs:
 
       - name: Wait for ClickHouse
         run: |
-          for i in {1..30}; do
-            if curl -sf 'http://127.0.0.1:18123/?query=SELECT%201' > /dev/null; then
-              echo "clickhouse01 ready"; break
-            fi
-            sleep 2
+          for host in 18123 18124; do
+            for i in {1..30}; do
+              if curl -sf "http://127.0.0.1:${host}/?query=SELECT%201" > /dev/null; then
+                echo "clickhouse on :${host} ready"; break
+              fi
+              sleep 2
+            done
           done
 
       - name: Run PHPUnit
+        env:
+          CLICKHOUSE_CLUSTER_AVAILABLE: '0'
         run: vendor/bin/phpunit

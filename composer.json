@@ -55,8 +55,6 @@
     },
     "scripts": {
         "post-autoload-dump": [
-            "@clear",
-            "@prepare",
             "@php -r \"file_exists('vendor/bin/testbench') && passthru('vendor/bin/testbench package:discover --ansi');\""
         ],
         "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",

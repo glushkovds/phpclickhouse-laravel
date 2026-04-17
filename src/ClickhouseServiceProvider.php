@@ -14,7 +14,7 @@ class ClickhouseServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/clickhouse.php', 'clickhouse');
+        $this->mergeConfigFrom(__DIR__ . '/../config/clickhouse.php', 'database.connections.clickhouse');
     }
 
     /**
