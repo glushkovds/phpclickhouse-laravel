@@ -22,7 +22,10 @@ abstract class TestCase extends OrchestraTestCase
         parent::setUp();
 
         if (! self::$migrated) {
-            Artisan::call('migrate', ['--path' => 'tests/migrations', '--realpath' => false]);
+            Artisan::call('migrate', [
+                '--path' => __DIR__ . '/migrations',
+                '--realpath' => true,
+            ]);
             self::$migrated = true;
         }
     }
