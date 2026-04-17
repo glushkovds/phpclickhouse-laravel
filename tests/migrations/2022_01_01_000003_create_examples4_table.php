@@ -11,6 +11,14 @@ return new class extends \PhpClickHouseLaravel\Migration {
      */
     public function up()
     {
+        if (! env('CLICKHOUSE_CLUSTER_AVAILABLE')) {
+            // Skip: the clickhouse-cluster connection and {replica}/{shard} macros
+            // are only configured when docker-compose.test.yaml mounts
+            // tests/docker/clickhouse0*/config.xml. GH Actions service containers
+            // cannot mount those, so this migration would fail there.
+            return;
+        }
+
         static::write(
             "
             CREATE TABLE IF NOT EXISTS examples4 (
@@ -31,6 +39,9 @@ return new class extends \PhpClickHouseLaravel\Migration {
      */
     public function down()
     {
+        if (! env('CLICKHOUSE_CLUSTER_AVAILABLE')) {
+            return;
+        }
         static::write('DROP TABLE examples4');
     }
 };
