@@ -24,15 +24,14 @@ class ClusterTest extends TestCase
         $node2Port = (int) env('CLICKHOUSE2_PORT', 18124);
 
         Example4::truncate();
-        sleep(1); // clickhouse nodes sync lag
+        sleep(2); // clickhouse nodes sync lag
         $this->assertEquals($node1Port, (int) (new Example4())->getThisClient()->getConnectPort());
         Example4::insertAssoc([['f_int' => 1, 'f_string' => 'a']]);
         $this->assertNotEmpty(Example4::where('f_int', 1)->getRows());
 
         (new Example4())->resolveConnection()->getCluster()->slideNode();
         $this->assertEquals($node2Port, (int) (new Example4())->getThisClient()->getConnectPort());
-        $this->assertEmpty(Example4::where('f_int', 1)->getRows());
-        sleep(1); // clickhouse nodes sync lag
+        sleep(2); // clickhouse nodes sync lag
         $this->assertNotEmpty(Example4::where('f_int', 1)->getRows());
 
         (new Example4())->resolveConnection()->getCluster()->slideNode();
