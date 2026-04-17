@@ -64,6 +64,9 @@ jobs:
           done
 
       - name: Run PHPUnit
-        env:
-          CLICKHOUSE_CLUSTER_AVAILABLE: '0'
-        run: vendor/bin/phpunit --testdox
+        run: |
+          # Gate cluster tests off: CI service containers cannot mount
+          # tests/docker/clickhouse0*/config.xml, so company_cluster and
+          # the {replica}/{shard} macros do not exist here.
+          sed -i 's|CLICKHOUSE_CLUSTER_AVAILABLE" value="1"|CLICKHOUSE_CLUSTER_AVAILABLE" value="0"|' phpunit.xml
+          vendor/bin/phpunit --testdox
