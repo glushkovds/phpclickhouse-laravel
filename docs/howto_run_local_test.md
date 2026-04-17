@@ -20,14 +20,17 @@ Tear down: `docker compose -f docker-compose.test.yaml down -v`
 
 ## Cluster tests
 
-`ClusterTest` needs the `company_cluster` definition that lives in
-`tests/docker/clickhouse01/config.d/*.xml`, mounted into the ClickHouse
+`ClusterTest` needs the `company_cluster` definition and the
+`{replica}` / `{shard}` macros that live in
+`tests/docker/clickhouse01/config.xml` and
+`tests/docker/clickhouse02/config.xml`, mounted into the ClickHouse
 containers by `docker-compose.test.yaml`. Locally this runs by default
 because `phpunit.xml` sets `CLICKHOUSE_CLUSTER_AVAILABLE=1`.
 
 In CI, GitHub Actions service containers cannot mount these configs,
-so `.github/workflows/tests.yml` overrides the env var to `0` and the
-two cluster tests `markTestSkipped`.
+so `.github/workflows/tests.yml` rewrites `phpunit.xml` before running
+the suite to flip the value to `0`, and the two cluster tests
+`markTestSkipped`.
 
 ## Artisan and Laravel Boost
 
