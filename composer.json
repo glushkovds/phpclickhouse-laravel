@@ -19,7 +19,7 @@
   "require": {
     "php": ">=8.0",
     "smi2/phpclickhouse": "^1.4.2",
-    "glushkovds/clickhouse-builder": "^6.1.2",
+    "glushkovds/clickhouse-builder": "^7",
     "illuminate/support": ">=7",
     "illuminate/database": ">=7",
     "glushkovds/php-clickhouse-schema-builder": "^1.0.2"
