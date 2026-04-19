@@ -31,10 +31,13 @@ class Builder extends BaseBuilder
      */
     protected $connection = Connection::DEFAULT_NAME;
 
-    public function __construct(?Client $client = null)
+    public function __construct(?Client $client = null, ?string $connection = null)
     {
         $this->grammar = new Grammar();
         $this->client = $client ?? $this->getThisClient();
+        if ($connection !== null) {
+            $this->connection = $connection;
+        }
     }
 
     /**
