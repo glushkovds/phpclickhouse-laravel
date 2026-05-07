@@ -20,6 +20,7 @@ Laravel adapter for PHP ClickHouse tooling:
 - Model events: `creating`, `created`, `saved`
 - Retry-on-network-error support (`retries` config key)
 - Buffer engine support via `$tableForInserts` / `$tableSources`
+- In-memory buffered inserts: accumulate rows with `Model::buffer()` and send them as a single HTTP request with `Model::flushBuffer()` (auto-flushed on script shutdown)
 - `OPTIMIZE`, `TRUNCATE`, `ALTER TABLE ... DELETE`, `ALTER TABLE ... UPDATE` helpers
 - Multi-instance and cluster-mode connections with active-node rotation
 - Publishable default config — `.env` is enough for most setups
@@ -309,6 +310,64 @@ class MyTable extends BaseModel
     protected $table = 'my_table_buffer';
 }
 ```
+
+### In-memory buffered inserts
+
+Different from the *Buffer table engine* above — this is a process-local
+row buffer kept in PHP memory. Useful when you want to coalesce many
+small writes into a single HTTP request without setting up a Buffer
+table on the ClickHouse side.
+
+```php
+MyTable::buffer(['model_name' => 'model 1', 'some_param' => 1]);
+MyTable::buffer(['model_name' => 'model 2', 'some_param' => 2]);
+// ... add as many as you like, possibly from different code paths ...
+
+MyTable::flushBuffer(); // single insertAssocBulk HTTP request
+```
+
+`buffer()` accepts either a single associative row or an array of rows:
+
+```php
+MyTable::buffer([
+    ['model_name' => 'model 1', 'some_param' => 1],
+    ['model_name' => 'model 2', 'some_param' => 2],
+]);
+```
+
+The cast pipeline used by `insertAssoc()` is applied at buffer time, so
+`$casts` keeps working for buffered rows too.
+
+If you forget to call `flushBuffer()`, the package flushes every model's
+buffer automatically at script shutdown (via Laravel's
+`Application::terminating()` hook plus a `register_shutdown_function`
+fallback for non-HTTP scripts). Errors during auto-flush are logged via
+`report()` rather than thrown, since the response has typically already
+been sent.
+
+If a manual `flushBuffer()` call fails (network error, schema mismatch,
+etc.), the exception bubbles up and **the buffer is preserved** so you
+can retry:
+
+```php
+try {
+    MyTable::flushBuffer();
+} catch (\Throwable $e) {
+    // rows are still in MyTable::getBufferedRows() — fix the issue and retry
+}
+```
+
+Each model class has its own buffer keyed by class name, so different
+models can buffer concurrently without interfering. Available helpers:
+
+| Method | Purpose |
+|---|---|
+| `MyTable::buffer($rowOrRows)` | Append a row (or rows) to the buffer |
+| `MyTable::flushBuffer()` | Send the buffer; returns `Statement` or `null` if empty |
+| `MyTable::bufferCount()` | Number of rows currently buffered for this model |
+| `MyTable::getBufferedRows()` | Snapshot of buffered rows (debug / inspection) |
+| `MyTable::clearBuffer()` | Discard the buffer without sending |
+| `BaseModel::flushAllBuffers(silent: false)` | Flush every model that has buffered rows |
 
 ### OPTIMIZE Statement
 

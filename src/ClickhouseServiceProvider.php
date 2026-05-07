@@ -48,5 +48,15 @@ class ClickhouseServiceProvider extends ServiceProvider
         });
 
         BaseModel::setEventDispatcher($this->app['events']);
+
+        $this->app->terminating(static function () {
+            BaseModel::flushAllBuffers(silent: true);
+        });
+
+        if (!$this->app->runningUnitTests()) {
+            register_shutdown_function(static function () {
+                BaseModel::flushAllBuffers(silent: true);
+            });
+        }
     }
 }

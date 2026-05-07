@@ -8,6 +8,7 @@ use ClickHouseDB\Client;
 use ClickHouseDB\Statement;
 use Exception;
 use Illuminate\Database\Eloquent\Concerns\HasAttributes;
+use PhpClickHouseLaravel\Concerns\HasBufferedInserts;
 use PhpClickHouseLaravel\Concerns\HasEvents;
 use Illuminate\Database\Eloquent\Concerns\HidesAttributes;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,7 @@ class BaseModel
     use HasAttributes;
     use HidesAttributes;
     use HasEvents;
+    use HasBufferedInserts;
     use WithClient;
 
     /**
@@ -245,20 +247,35 @@ class BaseModel
      */
     public static function insertAssoc(array $rows): Statement
     {
+        $rows = static::prepareAssocRowsForInsert($rows);
+        $instance = new static();
+        return $instance->getThisClient()->insertAssocBulk($instance->getTableForInserts(), $rows);
+    }
+
+    /**
+     * Normalize associative rows and apply $casts. Shared by insertAssoc() and
+     * the buffered insert pipeline so cast behavior stays identical.
+     *
+     * @param array[] $rows
+     * @return array[]
+     */
+    protected static function prepareAssocRowsForInsert(array $rows): array
+    {
         $rows = array_values($rows);
         if (isset($rows[0]) && isset($rows[1])) {
             $keys = array_keys($rows[0]);
             foreach ($rows as &$row) {
                 $row = array_replace(array_flip($keys), $row);
             }
+            unset($row);
         }
         if ($casts = (new static())->casts) {
             foreach ($rows as &$row) {
                 $row = static::castRow($row, $casts);
             }
+            unset($row);
         }
-        $instance = new static();
-        return $instance->getThisClient()->insertAssocBulk($instance->getTableForInserts(), $rows);
+        return $rows;
     }
 
     /**
