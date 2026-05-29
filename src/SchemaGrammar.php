@@ -71,6 +71,11 @@ class SchemaGrammar extends Grammar
         return 'Int16';
     }
 
+    protected function typeSmallInteger(Fluent $column): string
+    {
+        return 'Int16';
+    }
+
     /**
      * Create the column definition for an integer type.
      *
