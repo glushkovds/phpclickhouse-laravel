@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace PhpClickHouseLaravel;
 
-use ClickHouseDB\Statement;
 use ClickHouseDB\Transport\CurlerRequest;
 use Illuminate\Database\Migrations\Migration as BaseMigration;
 use PhpClickHouseSchemaBuilder\Tables\MergeTree;

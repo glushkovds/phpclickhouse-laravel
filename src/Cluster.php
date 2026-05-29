@@ -4,7 +4,6 @@ namespace PhpClickHouseLaravel;
 
 use ClickHouseDB\Client;
 use ClickHouseDB\Exception\TransportException;
-use ClickHouseDB\Statement;
 
 class Cluster
 {

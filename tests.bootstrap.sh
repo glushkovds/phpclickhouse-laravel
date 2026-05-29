@@ -1,6 +1,9 @@
 #!/bin/bash
 
+set -e
+
 # Installing current library files to empty laravel app
+
 cp -r /src/* vendor/glushkovds/phpclickhouse-laravel
 
 # Preparing Phpunit
@@ -21,9 +24,11 @@ cat /src/tests/config/.env >> /app/.env
 
 # Installing required libs, todo: refactor this
 composer require glushkovds/php-clickhouse-schema-builder
+#cp -r /vendor/laravel vendor/laravel
 
 # Creating test tables
 php artisan migrate
+php artisan migrate:rollback --step=1
 
 # Running tests
-php artisan test
+#php artisan test

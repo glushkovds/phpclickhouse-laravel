@@ -8,6 +8,7 @@ services:
       - zookeeper
     volumes:
       - ./:/src
+      - ./vendor/laravel:/app/vendor/laravel
 
   clickhouse01:
     image: clickhouse/clickhouse-server:24.8

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PhpClickHouseLaravel;
 
 use ClickHouseDB\Client;
-use ClickHouseDB\Statement;
 use Closure;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;

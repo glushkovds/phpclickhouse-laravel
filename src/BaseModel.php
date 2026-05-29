@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace PhpClickHouseLaravel;
 
-use ClickHouseDB\Client;
-use ClickHouseDB\Statement;
 use Exception;
 use Illuminate\Database\Eloquent\Concerns\HasAttributes;
 use PhpClickHouseLaravel\Concerns\HasEvents;
 use Illuminate\Database\Eloquent\Concerns\HidesAttributes;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tinderbox\ClickhouseBuilder\Query\Enums\Operator;
 use Tinderbox\ClickhouseBuilder\Query\TwoElementsLogicExpression;
