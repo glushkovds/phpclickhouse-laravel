@@ -21,34 +21,15 @@ More: https://github.com/smi2/phpClickHouse#features
 
 ## Installation
 
-**1.**  Install via composer
+Install via composer:
 
 ```sh
 $ composer require glushkovds/phpclickhouse-laravel
 ```
 
-**2.** Add new connection into your config/database.php:
+Laravel will discover the package service provider automatically.
 
-```php
-'clickhouse' => [
-    'driver' => 'clickhouse',
-    'host' => env('CLICKHOUSE_HOST'),
-    'port' => env('CLICKHOUSE_PORT','8123'),
-    'database' => env('CLICKHOUSE_DATABASE','default'),
-    'username' => env('CLICKHOUSE_USERNAME','default'),
-    'password' => env('CLICKHOUSE_PASSWORD',''),
-    'timeout_connect' => env('CLICKHOUSE_TIMEOUT_CONNECT',2),
-    'timeout_query' => env('CLICKHOUSE_TIMEOUT_QUERY',2),
-    'https' => (bool)env('CLICKHOUSE_HTTPS', null),
-    'retries' => env('CLICKHOUSE_RETRIES', 0),
-    'settings' => [ // optional
-        'max_partitions_per_insert_block' => 300,
-    ],
-    'fix_default_query_builder' => true,
-],
-```
-
-Then patch your .env:
+The package registers a `clickhouse` database connection with sensible defaults, so you only need to set the environment values you want to override:
 
 ```dotenv
 CLICKHOUSE_HOST=localhost
@@ -58,16 +39,43 @@ CLICKHOUSE_USERNAME=default
 CLICKHOUSE_PASSWORD=
 CLICKHOUSE_TIMEOUT_CONNECT=2
 CLICKHOUSE_TIMEOUT_QUERY=2
-# only if you use https connection
-CLICKHOUSE_HTTPS=true
+CLICKHOUSE_HTTPS=false
+CLICKHOUSE_RETRIES=0
+CLICKHOUSE_MAX_PARTITIONS_PER_INSERT_BLOCK=300
+CLICKHOUSE_FIX_DEFAULT_QUERY_BUILDER=true
 ```
 
-**3.** Add service provider into your config/app.php (bootstrap/providers.php for Laravel 11+) file providers section:
+If your application uses cached configuration, rebuild the cache after changing ClickHouse environment values.
+
+The package registers this connection as `database.connections.clickhouse` automatically when the application does not already define it in `config/database.php`.  
+If you need to override the defaults or add advanced options, define the connection in `config/database.php`:
 
 ```php
-\PhpClickHouseLaravel\ClickhouseServiceProvider::class,
+'connections' => [
+    'clickhouse' => [
+        'driver' => 'clickhouse',
+        'host' => env('CLICKHOUSE_HOST'),
+        'port' => (int) env('CLICKHOUSE_PORT', 8123),
+        'database' => env('CLICKHOUSE_DATABASE', 'default'),
+        'username' => env('CLICKHOUSE_USERNAME', 'default'),
+        'password' => env('CLICKHOUSE_PASSWORD', ''),
+        'timeout_connect' => env('CLICKHOUSE_TIMEOUT_CONNECT', 2),
+        'timeout_query' => env('CLICKHOUSE_TIMEOUT_QUERY', 2),
+        'https' => (bool) env('CLICKHOUSE_HTTPS', false),
+        'retries' => env('CLICKHOUSE_RETRIES', 0),
+        'settings' => [
+            'max_partitions_per_insert_block' => 300,
+        ],
+        'fix_default_query_builder' => true,
+    ],
+],
 ```
-It should be placed *before* App\Providers\AppServiceProvider::class, and   App\Providers\EventServiceProvider::class.
+
+If you use Lumen or have disabled Laravel package discovery, register the service provider manually:
+
+```php
+$app->register(\PhpClickHouseLaravel\ClickhouseServiceProvider::class);
+```
 
 ## Usage
 
@@ -378,7 +386,7 @@ MyTable::insertAssoc([[1, 'str', new InsertArray(['a','b'])]]);
 'clickhouse2' => [
     'driver' => 'clickhouse',
     'host' => 'clickhouse2',
-    'port' => '8123',
+    'port' => 8123,
     'database' => 'default',
     'username' => 'default',
     'password' => '',
@@ -441,11 +449,11 @@ Your config/database.php should look like:
     'cluster' => [
         [
             'host' => 'clickhouse01',
-            'port' => '8123',
+            'port' => 8123,
         ],
         [
             'host' => 'clickhouse02',
-            'port' => '8123',
+            'port' => 8123,
         ],
     ],
     'database' => env('CLICKHOUSE_DATABASE','default'),

@@ -12,6 +12,12 @@ use Illuminate\Support\ServiceProvider;
  */
 class ClickhouseServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        $this->mergeConfigFrom($this->packageConfigPath(), 'clickhouse');
+        $this->registerDefaultConnectionConfig();
+    }
+
     /**
      * @throws BindingResolutionException
      */
@@ -26,5 +32,25 @@ class ClickhouseServiceProvider extends ServiceProvider
         });
 
         BaseModel::setEventDispatcher($this->app['events']);
+    }
+
+    protected function registerDefaultConnectionConfig(): void
+    {
+        $configuredConnection = $this->app['config']->get('database.connections.'.Connection::DEFAULT_NAME);
+
+        $this->app['config']->set(
+            'database.connections.'.Connection::DEFAULT_NAME,
+            array_replace_recursive($this->defaultConnectionConfig(), (array)$configuredConnection)
+        );
+    }
+
+    protected function defaultConnectionConfig(): array
+    {
+        return (array)$this->app['config']->get('clickhouse.connection', []);
+    }
+
+    protected function packageConfigPath(): string
+    {
+        return __DIR__.'/../config/clickhouse.php';
     }
 }

@@ -35,27 +35,10 @@ return [
 
     'connections' => [
 
-        'clickhouse' => [
-            'driver' => 'clickhouse',
-            'host' => env('CLICKHOUSE_HOST'),
-            'port' => env('CLICKHOUSE_PORT', '8123'),
-            'database' => env('CLICKHOUSE_DATABASE', 'default'),
-            'username' => env('CLICKHOUSE_USERNAME', 'default'),
-            'password' => env('CLICKHOUSE_PASSWORD', ''),
-            'timeout_connect' => env('CLICKHOUSE_TIMEOUT_CONNECT', 2),
-            'timeout_query' => env('CLICKHOUSE_TIMEOUT_QUERY', 2),
-            'https' => (bool)env('CLICKHOUSE_HTTPS', null),
-            'retries' => env('CLICKHOUSE_RETRIES', 0),
-            'settings' => [
-                'max_partitions_per_insert_block' => 300,
-            ],
-            'fix_default_query_builder' => true,
-        ],
-
         'clickhouse2' => [
             'driver' => 'clickhouse',
             'host' => 'clickhouse02',
-            'port' => '8123',
+            'port' => 8123,
             'database' => 'default',
             'username' => 'default',
             'password' => '',
@@ -70,11 +53,11 @@ return [
             'cluster' => [
                 [
                     'host' => 'clickhouse01',
-                    'port' => '8123',
+                    'port' => 8123,
                 ],
                 [
                     'host' => 'clickhouse02',
-                    'port' => '8123',
+                    'port' => 8123,
                 ],
             ],
             'cluster_name' => 'company_cluster',
@@ -92,11 +75,11 @@ return [
             'cluster' => [
                 [
                     'host' => 'clickhouse03', // non-existent node
-                    'port' => '8123',
+                    'port' => 8123,
                 ],
                 [
                     'host' => 'clickhouse02',
-                    'port' => '8123',
+                    'port' => 8123,
                 ],
             ],
             'database' => 'default',

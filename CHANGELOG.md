@@ -1,3 +1,18 @@
+## 2.7.0 [2026-06-02]
+
+### Features
+1. Added Laravel package auto-discovery for `ClickhouseServiceProvider`
+2. Added automatic registration of the default `clickhouse` database connection from package config
+3. Simplified installation docs: only environment variables are required for the default connection
+
+### Upgrade notes
+1. Laravel applications using package discovery should remove `PhpClickHouseLaravel\ClickhouseServiceProvider` from `config/app.php` or `bootstrap/providers.php`
+2. Keep manual service provider registration only for Lumen applications or Laravel applications with package discovery disabled
+3. If your application uses cached configuration, rebuild the config cache after changing ClickHouse environment values
+
+### Testing
+1. Updated the test bootstrap to install the package under test via Composer path repository
+
 ## 2.5.0 [2026-02-10]
 
 ### Features
