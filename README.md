@@ -2,26 +2,26 @@
 
 # phpClickHouse-laravel
 
-Adapter to Laravel and Lumen of the most popular libraries:
+Laravel and Lumen adapter for popular ClickHouse libraries:
 
-- https://github.com/smi2/phpClickHouse - for connections and perform queries
-- https://github.com/the-tinderbox/ClickhouseBuilder - good query builder
+- https://github.com/smi2/phpClickHouse - connections and query execution
+- https://github.com/the-tinderbox/ClickhouseBuilder - query builder
 
 ## Features
 
-No dependency, only Curl (support php >=8.0 )
+Requires only the PHP cURL extension. PHP 8.0 or higher is supported.
 
-More: https://github.com/smi2/phpClickHouse#features
+See phpClickHouse features for more details: https://github.com/smi2/phpClickHouse#features
 
 ## Prerequisites
 
 - PHP 8.0
 - Laravel/Lumen 7+
-- Clickhouse server
+- ClickHouse server
 
 ## Installation
 
-Install via composer:
+Install via Composer:
 
 ```sh
 $ composer require glushkovds/phpclickhouse-laravel
@@ -29,7 +29,7 @@ $ composer require glushkovds/phpclickhouse-laravel
 
 Laravel will discover the package service provider automatically.
 
-The package registers a `clickhouse` database connection with sensible defaults, so you only need to set the environment values you want to override:
+The package registers a `clickhouse` database connection with sensible defaults. Set only the environment values you need to override:
 
 ```dotenv
 CLICKHOUSE_HOST=localhost
@@ -87,11 +87,11 @@ $db = DB::connection('clickhouse')->getClient();
 $statement = $db->select('SELECT * FROM summing_url_views LIMIT 2');
 ```
 
-More about `$db` see here: https://github.com/smi2/phpClickHouse/blob/master/README.md
+See the phpClickHouse documentation for more details: https://github.com/smi2/phpClickHouse/blob/master/README.md
 
-#### Or use dawnings of Eloquent ORM (will be implemented completely)
+### Lightweight Eloquent-like model layer
 
-**1.** Add model
+**1.** Add a model
 
 ```php
 <?php
@@ -102,13 +102,13 @@ use PhpClickHouseLaravel\BaseModel;
 
 class MyTable extends BaseModel
 {
-    // Not necessary. Can be obtained from class name MyTable => my_table
+    // Optional. By default, MyTable resolves to my_table.
     protected $table = 'my_table';
 
 }
 ```
 
-**2.** Add migration
+**2.** Add a migration
 
 ```php
 <?php
@@ -146,7 +146,7 @@ class CreateMyTable extends \PhpClickHouseLaravel\Migration
 }
 ```
 
-Or you can also use the Schema Builder
+You can also use the Schema Builder:
 
 ```php
 <?php
@@ -183,31 +183,31 @@ class CreateMyTable extends \PhpClickHouseLaravel\Migration
 }
 ```
 
-**3.** And then you can insert data
+**3.** Insert data
 
-One row
+Single row
 
 ```php
 $model = MyTable::create(['model_name' => 'model 1', 'some_param' => 1]);
-# or
+// or
 $model = MyTable::make(['model_name' => 'model 1']);
 $model->some_param = 1;
 $model->save();
-# or
+// or
 $model = new MyTable();
 $model->fill(['model_name' => 'model 1', 'some_param' => 1])->save();
 ```
 
-Or bulk insert
+Bulk insert
 
 ```php
-# Non assoc way
+// Non-associative way
 MyTable::insertBulk([['model 1', 1], ['model 2', 2]], ['model_name', 'some_param']);
-# Assoc way
+// Associative way
 MyTable::insertAssoc([['model_name' => 'model 1', 'some_param' => 1], ['some_param' => 2, 'model_name' => 'model 2']]);
 ```
 
-**4.** Now check out the query builder
+**4.** Query data
 
 ```php
 $rows = MyTable::select(['field_one', new RawColumn('sum(field_two)', 'field_two_sum')])
@@ -219,15 +219,15 @@ $rows = MyTable::select(['field_one', new RawColumn('sum(field_two)', 'field_two
 
 ## Known issues
 
-[Some of the problems are described here](/docs/known_issues.md).
+Known issues are described in [docs/known_issues.md](/docs/known_issues.md).
 
 ## Advanced usage
 
-### Columns casting
+### Column casting
 
-Before insertion, the column will be converted to the required data type specified in the field `$casts`.  
+Before insertion, columns are converted to the data types defined in `$casts`.  
 This feature does not apply to data selection.  
-The supported cast types are: `boolean`.
+Supported cast types: `boolean`.
 
 ```php
 namespace App\Models\Clickhouse;
@@ -251,29 +251,29 @@ MyTable::insertAssoc([
 
 ### Events
 
-Events work just like an [eloquent model events](https://laravel.com/docs/9.x/eloquent#events)  
-Available events: **creating**, **created**, **saved**
+Events work like [Eloquent model events](https://laravel.com/docs/9.x/eloquent#events).  
+Available events: **creating**, **created**, **saved**.
 
 ### Retries
 
-You may enable ability to retry requests while received not 200 response, maybe due network connectivity problems.
+You may enable request retries for non-200 responses, for example when temporary network issues occur.
 
-Patch your .env:
+Add the value to your `.env` file:
 
 ```dotenv
 CLICKHOUSE_RETRIES=2
 ```
 
-retries is optional, default value is 0.  
-0 mean only one attempt.  
-1 mean one attempt + 1 retry while error (total 2 attempts).
+`CLICKHOUSE_RETRIES` is optional. The default value is `0`.  
+`0` means one attempt.  
+`1` means one attempt plus one retry on error, for a total of two attempts.
 
 ### Working with huge rows
 
-You can chunk results like in Laravel
+You can chunk results like in Laravel:
 
 ```php
-// Split the result into chunks of 30 rows 
+// Split the result into chunks of 30 rows.
 $rows = MyTable::select(['field_one', 'field_two'])
     ->chunk(30, function ($rows) {
         foreach ($rows as $row) {
@@ -295,15 +295,15 @@ use PhpClickHouseLaravel\BaseModel;
 
 class MyTable extends BaseModel
 {
-    // Not necessary. Can be obtained from class name MyTable => my_table
+    // Optional. By default, MyTable resolves to my_table.
     protected $table = 'my_table';
-    // All inserts will be in the table $tableForInserts 
-    // But all selects will be from $table
+
+    // Inserts use $tableForInserts, selects use $table.
     protected $tableForInserts = 'my_table_buffer';
 }
 ```
 
-If you also want to read from your buffer table, put its name in $table
+If you also want to read from the buffer table, set `$table` to the buffer table name:
 
 ```php
 <?php
@@ -342,7 +342,7 @@ See https://clickhouse.com/docs/en/sql-reference/statements/alter/delete/
 MyTable::where('field_one', 123)->delete();
 ```
 
-Using buffer engine and performing OPTIMIZE or ALTER TABLE DELETE
+When using the Buffer engine, `OPTIMIZE` and `ALTER TABLE DELETE` can target the source table:
 
 ```php
 <?php
@@ -353,9 +353,10 @@ use PhpClickHouseLaravel\BaseModel;
 
 class MyTable extends BaseModel
 {
-    // All SELECT's and INSERT's on $table
+    // SELECT and INSERT queries use $table.
     protected $table = 'my_table_buffer';
-    // OPTIMIZE and DELETE on $tableSources
+
+    // OPTIMIZE and DELETE queries use $tableSources.
     protected $tableSources = 'my_table';
 }
 ```
@@ -378,9 +379,9 @@ MyTable::where('field_one', 123)
 MyTable::insertAssoc([[1, 'str', new InsertArray(['a','b'])]]);
 ```
 
-### Working with multiple Clickhouse instances in a project
+### Working with multiple ClickHouse instances in a project
 
-**1.** Add second connection into your config/database.php:
+**1.** Add a second connection to `config/database.php`:
 
 ```php
 'clickhouse2' => [
@@ -398,7 +399,7 @@ MyTable::insertAssoc([[1, 'str', new InsertArray(['a','b'])]]);
 ],
 ```
 
-**2.** Add model
+**2.** Add a model
 
 ```php
 <?php
@@ -414,7 +415,7 @@ class MyTable2 extends BaseModel
     protected $table = 'my_table2';
 }
 ```
-**3.** Add migration
+**3.** Add a migration
 
 ```php
 <?php
@@ -438,11 +439,11 @@ return new class extends \PhpClickHouseLaravel\Migration
 ### Cluster mode
 
 **Important!**
-* Each ClickHouse node must have one database name and login and password.
-* For reading and writing, the connection is made to the first available node.
-* Migrations executes on all nodes. If one of the nodes is unavailable, the migration will throw an exception.
+* Each ClickHouse node must use the same database name, username, and password.
+* Reads and writes use the first available node.
+* Migrations run on all nodes. If one node is unavailable, the migration will throw an exception.
 
-Your config/database.php should look like:
+Your `config/database.php` should look like this:
 ```php
 'clickhouse' => [
     'driver' => 'clickhouse',
@@ -470,7 +471,7 @@ Your config/database.php should look like:
 ],
 ```
 
-Migration is:
+Migration example:
 
 ```php
 <?php
@@ -508,7 +509,7 @@ return new class extends \PhpClickHouseLaravel\Migration
 };
 ```
 
-You can get the host of the current node and switch the active connection to the next node:
+You can get the current node host and switch the active connection to the next node:
 ```php
 $row = new MyTable();
 echo $row->getThisClient()->getConnectHost();
