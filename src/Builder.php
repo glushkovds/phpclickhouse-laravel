@@ -80,7 +80,7 @@ class Builder extends BaseBuilder
 
         $this->resolveConnection()->logQuery($query, $bindings, $this->getElapsedTime($start));
 
-        return $statement;
+        return LaravelStatement::fromStatement($statement);
     }
 
     /**
