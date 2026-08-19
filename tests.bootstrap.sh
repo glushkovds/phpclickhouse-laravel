@@ -5,7 +5,7 @@ set -e
 # Installing current library from the mounted source so Composer metadata
 # and Laravel package discovery use the package under test.
 composer config repositories.phpclickhouse-laravel path /src
-composer require glushkovds/phpclickhouse-laravel:*@dev --no-interaction --prefer-source
+composer require glushkovds/phpclickhouse-laravel:*@dev --no-interaction --prefer-source --with-all-dependencies
 
 # Preparing Phpunit
 cp /src/phpunit.xml phpunit.xml
