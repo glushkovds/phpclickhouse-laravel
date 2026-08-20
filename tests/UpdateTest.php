@@ -23,4 +23,21 @@ class UpdateTest extends TestCase
         $this->assertEquals('b', $rows[0]['f_string']);
         $this->assertEquals(date('Y') + 1, substr($rows[0]['created_at'], 0, 4));
     }
+
+    public function testUpdateLightweight()
+    {
+        Example::getClient()->write('ALTER TABLE examples MODIFY SETTING enable_block_number_column = 1, enable_block_offset_column = 1');
+        Example::truncate();
+        Example::insertAssoc([['f_int' => 1, 'f_int2' => 2, 'f_string' => 'a']]);
+        Example::where('f_int', 1)->updateLightweight([
+            'f_int2' => 3,
+            'f_string' => 'b',
+            'created_at' => new RawColumn('created_at + INTERVAL 1 YEAR')
+        ]);
+        $rows = Example::where('f_int', 1)->getRows();
+        $this->assertCount(1, $rows);
+        $this->assertEquals(3, $rows[0]['f_int2']);
+        $this->assertEquals('b', $rows[0]['f_string']);
+        $this->assertEquals(date('Y') + 1, substr($rows[0]['created_at'], 0, 4));
+    }
 }
