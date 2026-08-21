@@ -1,5 +1,5 @@
 <clickhouse>
-  <!-- Docs: <https://clickhouse.com/docs/en/operations/settings/settings_users/> -->
+  <!-- Docs: <https://clickhouse.com/docs/operations/settings/settings_users/> -->
   <users>
     <default>
       <!-- User default is available only locally -->

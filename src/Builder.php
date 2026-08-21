@@ -149,6 +149,32 @@ class Builder extends BaseBuilder
         return $this->client->write($sql);
     }
 
+    /**
+     * Lightweight UPDATE: writes a patch instead of rewriting whole parts, so it is orders of
+     * magnitude cheaper than update() for frequent, small changes (point updates by ORDER BY key).
+     * Requires ClickHouse >= 25.x and the target table having `enable_block_number_column` and
+     * `enable_block_offset_column` settings enabled, e.g.:
+     * ALTER TABLE `table` MODIFY SETTING enable_block_number_column = 1, enable_block_offset_column = 1
+     * @link https://clickhouse.com/docs/en/sql-reference/statements/update
+     * @return Statement
+     */
+    public function updateLightweight(array $values): Statement
+    {
+        if (empty($values)) {
+            throw QueryException::cannotUpdateEmptyValues();
+        }
+        $table = $this->tableSources ?? $this->getFrom()->getTable();
+        $set = [];
+        foreach ($values as $key => $value) {
+            $set[] = "`$key` = " . $this->grammar->wrap($value);
+        }
+        $settings = ['allow_experimental_lightweight_update' => 1] + $this->getSettings();
+        $sql = "UPDATE $table SET " . implode(', ', $set) . ' '
+            . $this->grammar->compileWheresComponent($this, $this->getWheres()) . ' '
+            . $this->grammar->compileSettingsComponent($this, $settings);
+        return $this->client->write($sql);
+    }
+
     public function newQuery(): self
     {
         return new static($this->client);

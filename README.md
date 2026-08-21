@@ -372,6 +372,29 @@ MyTable::where('field_one', 123)
     ->update(['field_two' => new RawColumn("concat(field_two,'new_val')")]);
 ```
 
+#### Lightweight updates
+
+`update()` compiles to `ALTER TABLE ... UPDATE`, a mutation that rewrites whole parts — cheap for rare,
+bulk changes, but too expensive to call frequently for small/point updates (e.g. once per incoming event).
+
+For that case use `updateLightweight()`, which writes a patch instead of rewriting parts and can be
+orders of magnitude faster for point updates. It requires ClickHouse >= 25.x, and the target table must
+have `enable_block_number_column` and `enable_block_offset_column` settings enabled:
+
+```php
+// one-time, per table
+MyTable::getClient()->write(
+    'ALTER TABLE my_table MODIFY SETTING enable_block_number_column = 1, enable_block_offset_column = 1'
+);
+```
+
+```php
+MyTable::where('field_one', 123)->updateLightweight(['field_two' => 'new_val']);
+```
+
+See https://clickhouse.com/docs/en/sql-reference/statements/update and
+https://clickhouse.com/blog/updates-in-clickhouse-3-benchmarks
+
 ### Helpers for inserting different data types
 
 ```php
